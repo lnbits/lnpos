@@ -469,7 +469,7 @@ void loop()
   // no methods available
   if (menuItemsAmount < 1)
   {
-    error("  NO METHODS", "RESTART & RUN PORTAL");
+    error("CONFIGURE ME", "  RESTART & HOLD *");
     delay(10000000);
   }
 
