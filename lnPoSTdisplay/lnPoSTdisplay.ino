@@ -316,7 +316,6 @@ void loop()
   {
     if (menuItemsAmount == 1)
     {
-      error("  NO METHODS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
       accessPoint();
     }
     if (menuItemsAmount > 1) {
@@ -341,7 +340,6 @@ void loop()
     }
     else if (selection == "Settings")
     {
-      error("   SETTINGS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
       accessPoint();
     }
   }
@@ -351,6 +349,37 @@ void loop()
 void accessPoint()
 {
   getParams();
+
+  pinToShow = "";
+  dataIn = "";
+  isATMMoneyPin(true);
+
+  while (unConfirmed)
+  {
+    key_val = "";
+    getKeypad(true, false, false, false);
+
+    if (key_val == "*")
+    {
+      unConfirmed = false;
+    }
+    else if (key_val == "#")
+    {
+      isATMMoneyPin(true);
+    }
+
+    if (pinToShow.length() == lnurlATMPin.length() && pinToShow != lnurlATMPin)
+    {
+      error("  WRONG PIN");
+      delay(1500);
+
+      pinToShow = "";
+      dataIn = "";
+      isATMMoneyPin(true);
+    }
+    else if (pinToShow == lnurlATMPin)
+    {
+      error("   SETTINGS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
   // general WiFi setting
   config.autoReset = false;
   config.autoReconnect = true;
@@ -467,6 +496,12 @@ void accessPoint()
     portal.join({elementsAux, saveAux});
     portal.config(config);
     portal.begin();
+  }
+    }
+    else
+    {
+      delay(100);
+    }
   }
 }
 
@@ -901,7 +936,7 @@ void configLaunch(String title)
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(0, 65);
   tft.setTextSize(2);
-  tft.println(" WHEN FINISHED RESET");
+  tft.println(" WHEN FINISHED *");
   
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(30, 83);

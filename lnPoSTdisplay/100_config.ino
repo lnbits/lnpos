@@ -10,6 +10,7 @@ void executeConfig() {
     getKeypad(false, true, false, false);
     if (key_val == "*"){
       getParams();
+      unConfirmed = false;
       return;  
     }
     if (Serial.available() == 0) continue;
