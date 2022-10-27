@@ -18,7 +18,7 @@ LNPoS includes:
 
 Original <a href="https://twitter.com/arcbtc/status/1484942260013838336">demo</a>
 
-Video tutorial <a href="https://www.youtube.com/watch?v=rOmO3GhsPts">https://www.youtube.com/watch?v=rOmO3GhsPts</a>
+Video tutorial <a href="https://twitter.com/arcbtc/status/1585605023337168896">https://twitter.com/arcbtc/status/1585605023337168896</a>
 
 Assembling case, battery and keypad hat <a href="https://www.youtube.com/watch?v=oVwm95j3NXk">https://www.youtube.com/watch?v=oVwm95j3NXk</a>
 
