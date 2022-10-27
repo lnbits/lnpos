@@ -4,7 +4,8 @@
 LNPoS
 </h1>
 
-## Free and open-source bitcoin point-of-sale (includes device portal for easy setup!)
+## Free and open-source bitcoin point-of-sale
+## Easy setup using browser https://lnbits.github.io/lnpos/installer/
 
 
 LNPoS includes:
