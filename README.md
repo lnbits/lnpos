@@ -35,6 +35,10 @@ Invoices are generated and checked from LNbits install.
 
 #### Setting up
 
+## Easy setup using browser https://lnbits.github.io/lnpos/installer/
+
+## WiFi Access Point config
+
 Launch portal and enter an LNbits endpoint (ie.legend.lnbits.com), invoice key, and a fiat currency to make things easier for product pricing.
 
 <img src="images/lnpos.png?raw=true" width="75%">
