@@ -884,6 +884,7 @@ void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
   {
     return;
   }
+  isPretendSleeping = false;
 
   key_val = String(key);
 
@@ -1337,8 +1338,6 @@ void updateBatteryStatus(bool force = false)
 
 void menuLoop()
 {
-  Serial.println("menuLoop");
-
   // footer/header
   tft.fillScreen(TFT_BLACK);
   tft.setTextSize(2);
@@ -1739,6 +1738,7 @@ float getInputVoltage()
 void maybeSleepDevice() {
   if(isSleepEnabled && !isPretendSleeping) {
     long currentTime = millis();
+    
     if(currentTime > (timeOfLastInteraction + sleepTimer * 1000)) {
       sleepAnimation();
       // The device wont charge if it is sleeping, so when charging, do a pretend sleep
