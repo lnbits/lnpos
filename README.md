@@ -4,7 +4,8 @@
 LNPoS
 </h1>
 
-## Free and open-source bitcoin point-of-sale (includes device portal for easy setup!)
+## Free and open-source bitcoin point-of-sale
+## Easy setup using browser https://lnbits.github.io/lnpos/installer/
 
 
 LNPoS includes:
@@ -17,9 +18,7 @@ LNPoS includes:
 
 Original <a href="https://twitter.com/arcbtc/status/1484942260013838336">demo</a>
 
-Video tutorial <a href="https://www.youtube.com/watch?v=rOmO3GhsPts">https://www.youtube.com/watch?v=rOmO3GhsPts</a>
-
-Assembling case, battery and keypad hat <a href="https://www.youtube.com/watch?v=oVwm95j3NXk">https://www.youtube.com/watch?v=oVwm95j3NXk</a>
+Video tutorial <a href="https://twitter.com/arcbtc/status/1585605023337168896">https://twitter.com/arcbtc/status/1585605023337168896</a>
 
 Join our telegram group <a href="https://t.me/makerbits">MakerBits</a>
 
@@ -27,14 +26,18 @@ Join our telegram group <a href="https://t.me/makerbits">MakerBits</a>
 Configuring
 </h2>
 
-> Press/hold any button on the keypad during startup for TDisplay, or any top button on M5Stack during logo screen, to trigger access portal.
-> Default password is "ToTheMoon1" (without the quotes)
+> Go to `settings` to lanch USB config mode or wifi access point
+> If using access opint the device SSID default password is "ToTheMoon1"
 
 ### LNPoS – Online Lightning Network payments
 
 Invoices are generated and checked from LNbits install.
 
 #### Setting up
+
+## Easy setup using browser https://lnbits.github.io/lnpos/installer/
+
+## WiFi Access Point config
 
 Launch portal and enter an LNbits endpoint (ie.legend.lnbits.com), invoice key, and a fiat currency to make things easier for product pricing.
 

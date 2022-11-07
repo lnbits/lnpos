@@ -24,7 +24,8 @@
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://github.com/lnbits/lnpos" />
     <meta property="twitter:title" content="LNPoS - Free Open Source Bitcoin Onchain and Lightning Point of Sale" />
-    <meta property="twitter:description" content="LNPoS - Free Open Source Bitcoin Onchain and Lightning Point of Sale" />
+    <meta property="twitter:description"
+        content="LNPoS - Free Open Source Bitcoin Onchain and Lightning Point of Sale" />
     <meta property="twitter:image" content="https://i.imgur.com/0lakiYN.png" />
 
     <!--====== Favicon Icon ======-->
@@ -77,6 +78,7 @@
                 </div>
             </div>
         </div>
+
     </header>
     <!-- ====== Header End ====== -->
 
@@ -96,40 +98,176 @@
                         </p>
                         <center>
                             <div style="max-width: 700px" class="row ud-hero-buttons">
-                                <div class="col">
+                                <div class="col-2">
                                     <a href="https://github.com/lnbits/LNPoS#lnpos" rel="nofollow noopener"
                                         class="ud-main-btn ud-white-btn">
                                         Github
                                     </a>
                                 </div>
-                                <div class="col">
-                                    <esp-web-install-button id="installStableButton" manifest="manifest.json">
-                                        <button slot="activate" class="ud-main-btn ud-white-btn" data-toggle="tooltip"
-                                            data-placement="bottom" title="Stable Version">Flash Stable Version</button>
-                                    </esp-web-install-button>
+                                <div class="col-4">
+                                    <select id="binVersionOption" onchange="updateBinVersion(this)"
+                                        class="ud-main-btn ud-white-btn">
+                                        <option value="v0.1">Stable Version</option>
+                                        <option value="v0.2">Test Version</option>
+                                    </select>
 
                                 </div>
-                                <div class="col">
-                                    <esp-web-install-button id="installTestButton" manifest="manifest.test.json">
+                                <div class="col-4">
+                                    <esp-web-install-button id="espInstallButton"
+                                        manifest="./firmware/esp32/v0.1/manifest.json">
                                         <button slot="activate" class="ud-main-btn ud-white-btn" data-toggle="tooltip"
-                                            data-placement="bottom" title="Test Version">Flash Test Version</button>
+                                            data-placement="bottom" title="Flasn">Flash</button>
                                     </esp-web-install-button>
                                 </div>
-
+                                <div class="col-2">
+                                    <label class="switch float-end mt-2">
+                                        <input id="showConfigToggle" onclick="onToggleConfig(this)" type="checkbox">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <label class="ud-feature-title float-end">Config</label>
+                                </div>
                             </div>
-                            <center>
-                                <p> </p>
-                            </center>
+
                         </center>
                     </div>
 
-                    <div class="ud-hero-image wow fadeInUp" data-wow-delay=".25s">
-                        <img src="../images/tdisplay.png" alt="tdisplay-image" />
-                        <img src="../../assets/images/hero/dotted-shape.svg" alt="shape" class="shape shape-1" />
-                        <img src="../../assets/images/hero/dotted-shape.svg" alt="shape" class="shape shape-2" />
+                    <div class="ud-hero-content wow fadeInUp">
+                        <div id="message-div" class="row mb-3 mt-3 ud-hero-buttons d-none">
+                            <div class="col-12">
+                                <button slot="activate" class="ud-main-btn ud-white-btn w-100">
+                                    <p id="message-text"></p>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3 mt-3 ud-hero-buttons">
+                            <div class="col-6">
+                                <!-- <label class="switch">
+                                    <input id="showConfigToggle" onclick="onToggleConfig(this)" type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label class="ud-feature-title">Show Config</label> -->
+                            </div>
+                            <div class="col-4">
+                                <div class="ud-login-form float-end lnpos-config-div d-none">
+                                    <div class="ud-form-group">
+                                        <label for="baud-rate">Baud Rate:</label>
+                                        <input type="number" name="baud-rate" id="baud-rate" value="115200"
+                                            placeholder="Baud Rate" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <input type="button" value="Connect" onclick="connectToDevice(this)"
+                                    class="ud-main-btn ud-white-btn float-end  lnpos-config-div d-none" />
+
+
+                            </div>
+                        </div>
+                        <hr class="mt-2 mb-3 lnpos-config-div d-none" />
+
+                        <div class="row ud-hero-buttons lnpos-config-div d-none">
+                            <div class="col-5">
+                                <div class="ud-login-form">
+                                    <div class="ud-form-group">
+                                        <label for="config-file-path">Config File Path (on device):</label>
+                                        <input type="text" name="config-file-path" id="config-file-path"
+                                            placeholder="Config File Path (on device)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <input type="button" value="Download from Device" onclick="downloadFromDevice(this)"
+                                    class="ud-main-btn ud-white-btn" />
+
+                            </div>
+                            <div class="col-1"></div>
+                            <div class="col-3">
+                                <button onclick="saveToDevice(this)" class="ud-main-btn ud-white-btn">
+                                    Save to Device
+                                </button>
+                            </div>
+                        </div>
+                        <div id="progress-bar-top" class="progress mb-3 d-none">
+                            <div id="progress-bar-value" class="progress-bar" style="width:50%"></div>
+                        </div>
+
+                        <div class="row ud-hero-buttons lnpos-config-div d-none">
+                            <div class="col-12">
+
+                                <div class="ud-contact-form-wrapper">
+                                    <div class="row ud-hero-buttons">
+                                        <div class="col-3 mt-3">
+                                            <label class="switch">
+                                                <input id="display-mode" onclick="onDisplayModeChamge()"
+                                                    type="checkbox">
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <label class="ud-feature-title">Text Mode</label>
+                                        </div>
+                                        <div class="col-3">
+                                            <select onchange="updateTemplate(this)" class="ud-main-btn">
+                                                <option value="" disabled selected>Select Template</option>
+                                                <option value="elements">LNPoS Config</option>
+                                                <!-- <option value="beskomat">Beskomat Config</option> -->
+                                            </select>
+                                        </div>
+                                        <div class="col-2"></div>
+                                        <div class="col-4">
+                                            <button onclick="document.getElementById('config-file-selector').click();"
+                                                class="ud-main-btn float-end">
+                                                Upload Config File
+                                            </button>
+                                            <input type="file" id="config-file-selector" style="display:none;"
+                                                class="ud-main-btn ud-white-btn" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div id="config-file-fields-group">
+                                                <br /><br />
+                                                <h3 class="ud-feature-title">No Config Data</h3>
+
+                                                <ul>
+                                                    <li>
+                                                        Upload a <code>.properties</code>' or <code>.json</code> file
+                                                    </li>
+                                                    <li>
+                                                        Or switch to 'Text Content Mode' to add new properties
+                                                    </li>
+                                                </ul>
+
+                                            </div>
+
+                                            <div id="config-file-text-group" style="display:none">
+                                                <div class="ud-form-group">
+                                                    <label for="config-file-text">Config File Text Content</label>
+                                                    <textarea name="config-file-text" id="config-file-text" rows="15"
+                                                        cols="200" placeholder="Add a new entry of the form 'key=value'"
+                                                        style="border-top: 2px solid #f1f1f1;"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="mt-3 mb-3 lnpos-config-div" />
+
                     </div>
                 </div>
+
+
+
             </div>
+
+            <div class="ud-hero-image wow fadeInUp" data-wow-delay=".25s">
+                <img src="../images/tdisplay.png" alt="tdisplay-image" />
+                <img src="../../assets/images/hero/dotted-shape.svg" alt="shape" class="shape shape-1" />
+                <img src="../../assets/images/hero/dotted-shape.svg" alt="shape" class="shape shape-2" />
+            </div>
+        </div>
+        </div>
         </div>
     </section>
     <!-- ====== Hero End ====== -->
@@ -145,6 +283,7 @@
                         <p>
                             LNPoS includes:
                         </p>
+
                     </div>
                 </div>
             </div>
@@ -359,6 +498,29 @@
             </div>
         </div>
     </footer>
+    <button id="show-modal-button" type="button" class="btn btn-primary d-none" data-bs-toggle="modal"
+        data-bs-target="#exampleModal">
+        Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">LNPoS</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ====== Footer End ====== -->
 
     <!-- ====== Back To Top Start ====== -->
@@ -372,6 +534,11 @@
     <script src="../../assets/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/js/wow.min.js"></script>
     <script src="../../assets/js/main.js"></script>
+
+    <script src="assets/js/templates.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script src="assets/js/serial.js"></script>
+    <script src="assets/js/config.js"></script>
     <script>
         // ==== for menu scroll
         const pageLink = document.querySelectorAll(".ud-menu-scroll");
@@ -414,6 +581,17 @@
         }
 
         window.document.addEventListener("scroll", onScroll);
+    </script>
+
+    <script>
+
+
+
+
+
+
+
+
     </script>
 </body>
 
