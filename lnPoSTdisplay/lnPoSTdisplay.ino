@@ -1454,18 +1454,14 @@ bool getSats()
                "\r\n" +
                toPost + "\n");
 
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-    if (line == "\r")
-    {
-      break;
-    }
-  }
+  String line = client.readString();
+  int locStart = line.indexOf("{");
+  int locFinish = line.indexOf("}", locStart);
+  String line =  line.substring(locStart, locFinish+1);
 
-  const String line = client.readString();
   StaticJsonDocument<150> doc;
   DeserializationError error = deserializeJson(doc, line);
+  
   if (error)
   {
     Serial.print("deserializeJson() failed: ");
@@ -1509,20 +1505,15 @@ bool getInvoice()
                "Content-Length: " + toPost.length() + "\r\n" +
                "\r\n" +
                toPost + "\n");
-
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-
-    if (line == "\r")
-    {
-      break;
-    }
-  }
-  const String line = client.readString();
+  
+  String line = client.readString();
+  int locStart = line.indexOf("{");
+  int locFinish = line.lastIndexOf("}");
+  String line =  line.substring(locStart, locFinish+1);
 
   StaticJsonDocument<1000> doc;
   DeserializationError error = deserializeJson(doc, line);
+  
   if (error)
   {
     Serial.print("deserializeJson() failed: ");
@@ -1559,20 +1550,15 @@ bool checkInvoice()
                "User-Agent: ESP32\r\n" +
                "Content-Type: application/json\r\n" +
                "Connection: close\r\n\r\n");
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-    if (line == "\r")
-    {
-      break;
-    }
-  }
+  
+  String line = client.readString();
+  int locStart = line.indexOf("{");
+  int locFinish = line.lastIndexOf("}");
+  String line =  line.substring(locStart, locFinish+1);
 
-  const String line = client.readString();
-  Serial.println(line);
   StaticJsonDocument<2000> doc;
-
   DeserializationError error = deserializeJson(doc, line);
+  
   if (error)
   {
     Serial.print("deserializeJson() failed: ");
