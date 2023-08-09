@@ -2,6 +2,7 @@
 #include <WebServer.h>
 #include <FS.h>
 #include <SPIFFS.h>
+#include <math.h>
 using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
@@ -13,6 +14,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <TFT_eSPI.h>
 #include <Hash.h>
 #include <ArduinoJson.h>
+#include <stdio.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
 //#include "esp_adc_cal.h"
@@ -52,14 +54,17 @@ String secretATM;
 String currencyATM;
 String lnurlATMMS;
 String dataIn = "0";
-String amountToShow = "0.00";
 String noSats = "0";
 String qrData;
 String dataId;
 String addressNo;
 String pinToShow;
+String precision = "0";
+String amountToShow = "0";
 const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+char precisionOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
+double amountToShowNumber;
 String selection;
 int menuItemNo = 0;
 int randomPin;
@@ -176,6 +181,12 @@ static const char PAGE_ELEMENTS[] PROGMEM = R"(
       "label": "LNURLATM pin String"
     },
     {
+      "name": "precision",
+      "type": "ACInput",
+      "value": "0",
+      "label": "Fiat decimal precision"
+    },
+    {
       "name": "load",
       "type": "ACSubmit",
       "value": "Load",
@@ -259,6 +270,15 @@ AutoConnectConfig config;
 AutoConnectAux elementsAux;
 AutoConnectAux saveAux;
 
+void formatNumber(float number, int precision, char *output) {
+  // Create a format string based on the precision
+  char formatString[10];
+  sprintf(formatString, "%%.%df", precision);
+
+  // Use the format string to write the number to the output buffer
+  sprintf(output, formatString, number);
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -285,7 +305,8 @@ void loop()
 {
   noSats = "0";
   dataIn = "0";
-  amountToShow = "0";
+  formatNumber(0, precision.toInt(), precisionOutput);
+  amountToShow = precisionOutput;;
   unConfirmed = true;
   key_val = "";
 
@@ -380,123 +401,126 @@ void accessPoint()
     else if (pinToShow == lnurlATMPin)
     {
       error("   SETTINGS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
-  // general WiFi setting
-  config.autoReset = false;
-  config.autoReconnect = true;
-  config.reconnectInterval = 1; // 30s
-  config.beginTimeout = 10000UL;
+      // general WiFi setting
+      config.autoReset = false;
+      config.autoReconnect = true;
+      config.reconnectInterval = 1; // 30s
+      config.beginTimeout = 10000UL;
 
-  // start portal (any key pressed on startup)
-  int count = 0;
-  while(count < 10){
-    key_val = "";
-    delay(200);
-    count++;
-    const char key = keypad.getKey();
-  if (key == '1') {
-    configOverSerialPort();
-    key_val = "";
-    getKeypad(false, true, false, false);
-    if (key_val == "*"){
-      return;  
-    }
-  } else if (key != NO_KEY){
-    // handle access point traffic
-    server.on("/", []() {
-      String content = "<h1>LNPoS</br>Free open-source bitcoin PoS</h1>";
-      content += AUTOCONNECT_LINK(COG_24);
-      server.send(200, "text/html", content);
-    });
+      // start portal (any key pressed on startup)
+      int count = 0;
+      while(count < 10){
+        key_val = "";
+        delay(200);
+        count++;
+        const char key = keypad.getKey();
+        if (key == '1') {
+          configOverSerialPort();
+          key_val = "";
+          getKeypad(false, true, false, false);
+          if (key_val == "*"){
+            return;  
+          }
+        } else if (key != NO_KEY) {
+          // handle access point traffic
+          server.on("/", []() {
+            String content = "<h1>LNPoS</br>Free open-source bitcoin PoS</h1>";
+            content += AUTOCONNECT_LINK(COG_24);
+            server.send(200, "text/html", content);
+          });
 
-    elementsAux.load(FPSTR(PAGE_ELEMENTS));
-    elementsAux.on([](AutoConnectAux &aux, PageArgument &arg) {
-      File param = FlashFS.open(PARAM_FILE, "r");
-      if (param)
-      {
-        aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin"});
-        param.close();
-      }
+          elementsAux.load(FPSTR(PAGE_ELEMENTS));
+          elementsAux.on([](AutoConnectAux &aux, PageArgument &arg) {
+            File param = FlashFS.open(PARAM_FILE, "r");
+            if (param)
+            {
+              aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+              param.close();
+            }
 
-      if (portal.where() == "/posconfig")
-      {
-        File param = FlashFS.open(PARAM_FILE, "r");
-        if (param)
-        {
-          aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin"});
-          param.close();
+            if (portal.where() == "/posconfig")
+            {
+              File param = FlashFS.open(PARAM_FILE, "r");
+              if (param)
+              {
+                aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+                param.close();
+              }
+            }
+            return String();
+          });
+
+          saveAux.load(FPSTR(PAGE_SAVE));
+          saveAux.on([](AutoConnectAux &aux, PageArgument &arg) {
+            aux["caption"].value = PARAM_FILE;
+            File param = FlashFS.open(PARAM_FILE, "w");
+
+            if (param)
+            {
+              // save as a loadable set for parameters.
+              elementsAux.saveElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+              param.close();
+
+              // read the saved elements again to display.
+              param = FlashFS.open(PARAM_FILE, "r");
+              aux["echo"].value = param.readString();
+              param.close();
+            }
+            else
+            {
+              aux["echo"].value = "Filesystem failed to open.";
+            }
+
+            return String();
+          });
+
+          config.immediateStart = true;
+          config.ticker = true;
+          config.apid = "LNPoS-" + String((uint32_t)ESP.getEfuseMac(), HEX);
+          config.psk = apPassword;
+          config.menuItems = AC_MENUITEM_CONFIGNEW | AC_MENUITEM_OPENSSIDS | AC_MENUITEM_RESET;
+          config.title = "LNPoS";
+
+          // start access point
+          portalLaunch();
+          
+          portal.join({elementsAux, saveAux});
+          config.retainPortal = true;
+          config.autoRise = false;
+          portal.config(config);
+          portal.begin();
+          config.autoRise = true;
+          portal.config(config);
+
+          while (true)
+          {
+            key_val = "";
+            getKeypad(false, true, false, false);
+            if (key_val == "*"){
+              unConfirmed = false;
+              portal.end();
+
+              portal.join({elementsAux, saveAux});
+              portal.config(config);
+              portal.begin();
+              getParams();
+              return;  
+            }
+
+            portal.handleClient();
+          }
         }
       }
-      return String();
-    });
 
-    saveAux.load(FPSTR(PAGE_SAVE));
-    saveAux.on([](AutoConnectAux &aux, PageArgument &arg) {
-      aux["caption"].value = PARAM_FILE;
-      File param = FlashFS.open(PARAM_FILE, "w");
-
-      if (param)
+      // connect to configured WiFi
+      if (menuItemCheck[0])
       {
-        // save as a loadable set for parameters.
-        elementsAux.saveElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin"});
-        param.close();
-
-        // read the saved elements again to display.
-        param = FlashFS.open(PARAM_FILE, "r");
-        aux["echo"].value = param.readString();
-        param.close();
-      }
-      else
-      {
-        aux["echo"].value = "Filesystem failed to open.";
-      }
-
-      return String();
-    });
-
-    config.immediateStart = true;
-    config.ticker = true;
-    config.apid = "LNPoS-" + String((uint32_t)ESP.getEfuseMac(), HEX);
-    config.psk = apPassword;
-    config.menuItems = AC_MENUITEM_CONFIGNEW | AC_MENUITEM_OPENSSIDS | AC_MENUITEM_RESET;
-    config.title = "LNPoS";
-
-    // start access point
-    portalLaunch();
-    
-    config.autoRise = false;
-    
-    portal.join({elementsAux, saveAux});
-    portal.config(config);
-    portal.begin();
-    while (true)
-    {
-      key_val = "";
-      getKeypad(false, true, false, false);
-      if (key_val == "*"){
-        unConfirmed = false;
-        portal.end();
+        config.autoRise = false;
 
         portal.join({elementsAux, saveAux});
         portal.config(config);
         portal.begin();
-        getParams();
-        return;  
       }
-      portal.handleClient();
-      
-    }
-  }
-  }
-
-  // connect to configured WiFi
-  if (menuItemCheck[0])
-  {
-    config.autoRise = false;
-
-    portal.join({elementsAux, saveAux});
-    portal.config(config);
-    portal.begin();
-  }
     }
     else
     {
@@ -575,6 +599,11 @@ void getParams()
     const JsonObject lnurlATMPinRoot = doc[8];
     const char *lnurlATMPinChar = lnurlATMPinRoot["value"];
     lnurlATMPin = lnurlATMPinChar;
+
+
+    const JsonObject precisionRoot = doc[9];
+    const char *precisionChar = precisionRoot["value"];
+    precision = precisionChar;
   }
 
   paramFile.close();
@@ -724,7 +753,8 @@ void lnMain()
           {
             noSats = "0";
             dataIn = "0";
-            amountToShow = "0";
+            formatNumber(0, precision.toInt(), precisionOutput);
+            amountToShow = precisionOutput;
             unConfirmed = false;
             timer = 5000;
             break;
@@ -742,7 +772,8 @@ void lnMain()
 
       noSats = "0";
       dataIn = "0";
-      amountToShow = "0";
+      formatNumber(0, precision.toInt(), precisionOutput);
+      amountToShow = precisionOutput;
     }
     else
     {
@@ -962,14 +993,17 @@ void isLNMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShow = String(dataIn.toFloat() / 100);
-    noSats = String((converted / 100) * dataIn.toFloat());
+    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
+    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
+    amountToShow = String(precisionOutput);
+    noSats = String((converted / pow(10, precision.toInt())) * dataIn.toFloat());
   }
   else
   {
     noSats = "0";
     dataIn = "0";
-    amountToShow = "0";
+    formatNumber(0, precision.toInt(), precisionOutput);
+    amountToShow = precisionOutput;
   }
 
   tft.setTextSize(3);
@@ -998,12 +1032,15 @@ void isLNURLMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShow = String(dataIn.toFloat() / 100);
+    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
+    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
+    amountToShow = String(precisionOutput);
   }
   else
   {
     dataIn = "0";
-    amountToShow = "0.00";
+    formatNumber(0, precision.toInt(), precisionOutput);
+    amountToShow = precisionOutput;
   }
 
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1028,12 +1065,15 @@ void isATMMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShow = String(dataIn.toFloat() / 100);
+    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
+    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
+    amountToShow = String(precisionOutput);
   }
   else
   {
     dataIn = "0";
-    amountToShow = "0.00";
+    formatNumber(0, precision.toInt(), precisionOutput);
+    amountToShow = precisionOutput;
   }
 
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1498,7 +1538,7 @@ bool getInvoice()
     return false;
   }
 
-  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
+  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt() * pow(10, 2 - precision.toInt())) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + lnbitsServerChar + "\r\n" +
@@ -1630,13 +1670,13 @@ void makeLNURL()
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
   if (selection == "Offline PoS")
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt());
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - precision.toInt()));
     preparedURL = baseURLPoS + "?p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
   else // ATM
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt());
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - precision.toInt()));
     preparedURL = baseURLATM + "?atm=1&p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
