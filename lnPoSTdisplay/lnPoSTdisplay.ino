@@ -288,6 +288,10 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(true);
 
+  config.autoRise = false;
+  portal.config(config);
+  portal.begin();
+
   logo();
 
   // load buttons
@@ -406,6 +410,7 @@ void accessPoint()
       config.autoReconnect = true;
       config.reconnectInterval = 1; // 30s
       config.beginTimeout = 10000UL;
+      config.portalTimeout = 180000;
 
       // start portal (any key pressed on startup)
       int count = 0;
@@ -498,11 +503,11 @@ void accessPoint()
             getKeypad(false, true, false, false);
             if (key_val == "*"){
               unConfirmed = false;
-              portal.end();
+              // portal.end();
 
-              portal.join({elementsAux, saveAux});
-              portal.config(config);
-              portal.begin();
+              // portal.join({elementsAux, saveAux});
+              // portal.config(config);
+              // portal.begin();
               getParams();
               return;  
             }
