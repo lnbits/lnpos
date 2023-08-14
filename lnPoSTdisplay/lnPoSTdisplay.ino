@@ -288,9 +288,18 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(true);
 
-  config.autoRise = false;
-  portal.config(config);
-  portal.begin();
+
+  portal.join({elementsAux, saveAux});
+
+  
+  // connect to configured WiFi
+  if (menuItemCheck[0])
+  {
+    config.autoRise = false;
+
+    portal.config(config);
+    portal.begin();
+  }
 
   logo();
 
@@ -302,6 +311,7 @@ void setup()
     SPIFFS.format(); 
   }
   getParams();
+
   delay(2000);
 }
 
@@ -487,44 +497,47 @@ void accessPoint()
           config.title = "LNPoS";
 
           // start access point
+          Serial.println("wifi ap mode");
           portalLaunch();
           
-          portal.join({elementsAux, saveAux});
+          Serial.println("create wifi page");
+          
           config.retainPortal = true;
           config.autoRise = false;
+          Serial.println("apply captive portal");
           portal.config(config);
+          Serial.println("ready to set wifi ap");
           portal.begin();
+          Serial.println("wifi ap already started");
           config.autoRise = true;
           portal.config(config);
 
+          Serial.println("waiting keyboard...");
           while (true)
           {
+            char const k = keypad.getKey();
+
+            if (k != NO_KEY) {
+              Serial.println(k);
+            }
+            
             key_val = "";
             getKeypad(false, true, false, false);
-            if (key_val == "*"){
+            if (key_val == "*") {
               unConfirmed = false;
-              // portal.end();
+              portal.end();
 
-              // portal.join({elementsAux, saveAux});
-              // portal.config(config);
-              // portal.begin();
+              portal.config(config);
+              portal.begin();
               getParams();
               return;  
             }
 
             portal.handleClient();
+
+            sleep(10);
           }
         }
-      }
-
-      // connect to configured WiFi
-      if (menuItemCheck[0])
-      {
-        config.autoRise = false;
-
-        portal.join({elementsAux, saveAux});
-        portal.config(config);
-        portal.begin();
       }
     }
     else
@@ -916,10 +929,12 @@ void lnurlATMMain()
 void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
 {
   const char key = keypad.getKey();
+  
   if (key == NO_KEY)
   {
     return;
   }
+
   isPretendSleeping = false;
 
   key_val = String(key);
