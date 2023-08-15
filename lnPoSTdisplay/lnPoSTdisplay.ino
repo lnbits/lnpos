@@ -60,10 +60,10 @@ String qrData;
 String dataId;
 String addressNo;
 String pinToShow;
-String precision = "0";
+String decimalplaces = "2";
 String amountToShow = "0";
 const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
-char precisionOutput[20];
+char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
 double amountToShowNumber;
 String selection;
@@ -183,10 +183,10 @@ static const char PAGE_ELEMENTS[] PROGMEM = R"(
       "label": "LNURLATM pin String"
     },
     {
-      "name": "precision",
+      "name": "decimalplaces",
       "type": "ACInput",
-      "value": "0",
-      "label": "Fiat decimal precision"
+      "value": "2",
+      "label": "Fiat decimal places"
     },
     {
       "name": "load",
@@ -272,10 +272,10 @@ AutoConnectConfig config;
 AutoConnectAux elementsAux;
 AutoConnectAux saveAux;
 
-void formatNumber(float number, int precision, char *output) {
-  // Create a format string based on the precision
+void formatNumber(float number, int decimalplaces, char *output) {
+  // Create a format string based on the decimalplaces
   char formatString[10];
-  sprintf(formatString, "%%.%df", precision);
+  sprintf(formatString, "%%.%df", decimalplaces);
 
   // Use the format string to write the number to the output buffer
   sprintf(output, formatString, number);
@@ -331,8 +331,8 @@ void loop()
 {
   noSats = "0";
   dataIn = "0";
-  formatNumber(0, precision.toInt(), precisionOutput);
-  amountToShow = precisionOutput;;
+  formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+  amountToShow = decimalplacesOutput;;
   unConfirmed = true;
   key_val = "";
 
@@ -460,7 +460,7 @@ void accessPoint()
             File param = FlashFS.open(PARAM_FILE, "r");
             if (param)
             {
-              aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+              aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces"});
               param.close();
             }
 
@@ -469,7 +469,7 @@ void accessPoint()
               File param = FlashFS.open(PARAM_FILE, "r");
               if (param)
               {
-                aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+                aux.loadElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces"});
                 param.close();
               }
             }
@@ -484,7 +484,7 @@ void accessPoint()
             if (param)
             {
               // save as a loadable set for parameters.
-              elementsAux.saveElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "precision"});
+              elementsAux.saveElement(param, {"password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces"});
               param.close();
 
               // read the saved elements again to display.
@@ -643,9 +643,9 @@ void getParams()
     lnurlATMPin = lnurlATMPinChar;
 
 
-    const JsonObject precisionRoot = doc[9];
-    const char *precisionChar = precisionRoot["value"];
-    precision = precisionChar;
+    const JsonObject decimalplacesRoot = doc[9];
+    const char *decimalplacesChar = decimalplacesRoot["value"];
+    decimalplaces = decimalplacesChar;
   }
 
   paramFile.close();
@@ -795,8 +795,8 @@ void lnMain()
           {
             noSats = "0";
             dataIn = "0";
-            formatNumber(0, precision.toInt(), precisionOutput);
-            amountToShow = precisionOutput;
+            formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+            amountToShow = decimalplacesOutput;
             unConfirmed = false;
             timer = 5000;
             break;
@@ -814,8 +814,8 @@ void lnMain()
 
       noSats = "0";
       dataIn = "0";
-      formatNumber(0, precision.toInt(), precisionOutput);
-      amountToShow = precisionOutput;
+      formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+      amountToShow = decimalplacesOutput;
     }
     else
     {
@@ -1037,17 +1037,17 @@ void isLNMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
-    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
-    amountToShow = String(precisionOutput);
-    noSats = String((converted / pow(10, precision.toInt())) * dataIn.toFloat());
+    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
+    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = String(decimalplacesOutput);
+    noSats = String((converted / pow(10, decimalplaces.toInt())) * dataIn.toFloat());
   }
   else
   {
     noSats = "0";
     dataIn = "0";
-    formatNumber(0, precision.toInt(), precisionOutput);
-    amountToShow = precisionOutput;
+    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = decimalplacesOutput;
   }
 
   tft.setTextSize(3);
@@ -1076,15 +1076,15 @@ void isLNURLMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
-    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
-    amountToShow = String(precisionOutput);
+    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
+    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = String(decimalplacesOutput);
   }
   else
   {
     dataIn = "0";
-    formatNumber(0, precision.toInt(), precisionOutput);
-    amountToShow = precisionOutput;
+    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = decimalplacesOutput;
   }
 
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1109,15 +1109,15 @@ void isATMMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, precision.toInt());
-    formatNumber(amountToShowNumber, precision.toInt(), precisionOutput);
-    amountToShow = String(precisionOutput);
+    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
+    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = String(decimalplacesOutput);
   }
   else
   {
     dataIn = "0";
-    formatNumber(0, precision.toInt(), precisionOutput);
-    amountToShow = precisionOutput;
+    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShow = decimalplacesOutput;
   }
 
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1582,7 +1582,7 @@ bool getInvoice()
     return false;
   }
 
-  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt() * pow(10, 2 - precision.toInt())) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
+  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt() * pow(10, 2 - decimalplaces.toInt())) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + lnbitsServerChar + "\r\n" +
@@ -1714,13 +1714,13 @@ void makeLNURL()
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
   if (selection == "Offline PoS")
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - precision.toInt()));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - decimalplaces.toInt()));
     preparedURL = baseURLPoS + "?p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
   else // ATM
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - precision.toInt()));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - decimalplaces.toInt()));
     preparedURL = baseURLATM + "?atm=1&p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
