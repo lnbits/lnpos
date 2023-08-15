@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <FS.h>
+#include <Preferences.h>
 #include <SPIFFS.h>
 #include <math.h>
 using WebServerClass = WebServer;
@@ -92,6 +93,7 @@ enum InvoiceType {
   LNURLATM,
   PORTAL
 };
+Preferences preferences;
 
 // custom access point pages
 static const char PAGE_ELEMENTS[] PROGMEM = R"(
@@ -288,19 +290,8 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(true);
 
-
   portal.join({elementsAux, saveAux});
-
   
-  // connect to configured WiFi
-  if (menuItemCheck[0])
-  {
-    config.autoRise = false;
-
-    portal.config(config);
-    portal.begin();
-  }
-
   logo();
 
   // load buttons
@@ -311,6 +302,27 @@ void setup()
     SPIFFS.format(); 
   }
   getParams();
+
+  // connect to configured WiFi
+  if (menuItemCheck[0])
+  {
+    preferences.begin("wifi", false); // Open Preferences with read-only
+    String ssid = preferences.getString("ssid", ""); // Get stored SSID
+    String password = preferences.getString("password", ""); // Get stored password
+    preferences.end();
+
+    if (ssid != "" && password != "") {
+      // Use stored credentials to configure the AutoConnect
+      config.bootUri = AC_ONBOOTURI_HOME;
+      portal.config(config);
+      portal.begin(ssid.c_str(), password.c_str());
+    }
+    
+    config.autoRise = false;
+
+    portal.config(config);
+    portal.begin();
+  }
 
   delay(2000);
 }
@@ -379,7 +391,6 @@ void loop()
     }
   }
 }
-
 
 void accessPoint()
 {
@@ -498,6 +509,7 @@ void accessPoint()
 
           // start access point
           Serial.println("wifi ap mode");
+          WiFi.mode(WIFI_AP);
           portalLaunch();
           
           Serial.println("create wifi page");
@@ -506,6 +518,7 @@ void accessPoint()
           config.autoRise = false;
           Serial.println("apply captive portal");
           portal.config(config);
+          portal.onConnect(onConnect);
           Serial.println("ready to set wifi ap");
           portal.begin();
           Serial.println("wifi ap already started");
@@ -513,29 +526,25 @@ void accessPoint()
           portal.config(config);
 
           Serial.println("waiting keyboard...");
+
           while (true)
           {
-            char const k = keypad.getKey();
-
-            if (k != NO_KEY) {
-              Serial.println(k);
-            }
-            
             key_val = "";
             getKeypad(false, true, false, false);
             if (key_val == "*") {
               unConfirmed = false;
               portal.end();
-
+              config.autoRise = false;
               portal.config(config);
               portal.begin();
-              getParams();
+              Serial.println("connect ap");
+              ESP.restart();
               return;  
             }
 
             portal.handleClient();
 
-            sleep(10);
+            delay(100);
           }
         }
       }
@@ -545,6 +554,21 @@ void accessPoint()
       delay(100);
     }
   }
+}
+
+String onConnect(IPAddress& ip) {
+  Preferences preferences;
+  preferences.begin("wifi", false); // Open Preferences with read-write
+
+  String ssid = WiFi.SSID(); // Get the connected SSID
+  String password = WiFi.psk(); // Get the connected password
+
+  preferences.putString("ssid", ssid);
+  preferences.putString("password", password);
+  preferences.end();
+
+  Serial.println("Credentials saved");
+  return String();
 }
 
 void getParams()
