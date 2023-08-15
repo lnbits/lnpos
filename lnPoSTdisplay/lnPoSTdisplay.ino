@@ -1582,7 +1582,7 @@ bool getInvoice()
     return false;
   }
 
-  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt() * pow(10, 2 - decimalplaces.toInt())) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
+  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + lnbitsServerChar + "\r\n" +
