@@ -783,7 +783,10 @@ void lnurlPoSMain() {
     if (key_val == "*") {
       unConfirmed = false;
     } else if (key_val == "#") {
-      makeLNURL();
+      if (!makeLNURL()) {
+        isLNURLMoneyNumber(true);
+        continue;
+      }
       qrShowCodeLNURL(" *MENU #SHOW PIN");
 
       while (unConfirmed) {
@@ -846,7 +849,10 @@ void lnurlATMMain() {
         if (key_val == "*") {
           unConfirmed = false;
         } else if (key_val == "#") {
-          makeLNURL();
+          if (!makeLNURL()) {
+            isATMMoneyNumber(true);
+            continue;
+          }
           qrShowCodeLNURL(" *MENU");
 
           while (unConfirmed) {
@@ -1499,11 +1505,11 @@ void to_upper(char *arr) {
   }
 }
 
-void makeLNURL() {
+bool makeLNURL() {
   if (amountToShow.toFloat() == 0) {
     error("ZERO VALUE");
     delay(3000);
-    return;
+    return false;
   }
 
   randomPin = random(1000, 9999);
@@ -1544,6 +1550,8 @@ void makeLNURL() {
   to_upper(charLnurl);
   qrData = charLnurl;
   Serial.println(qrData);
+
+  return true;
 }
 
 int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uint8_t *nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents) {
