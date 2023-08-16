@@ -290,6 +290,8 @@ void setup() {
   tft.setRotation(1);
   tft.invertDisplay(true);
 
+  config.beginTimeout = 10000UL;
+
   portal.join({ elementsAux, saveAux });
 
   logo();
@@ -304,20 +306,25 @@ void setup() {
   getParams();
 
   // connect to configured WiFi
+  Serial.println("connect to configured WiFi");
   if (menuItemCheck[0]) {
     preferences.begin("wifi", false);                         // Open Preferences with read-only
     String ssid = preferences.getString("ssid", "");          // Get stored SSID
     String password = preferences.getString("password", "");  // Get stored password
     preferences.end();
 
+    config.autoRise = false;
+
     if (ssid != "" && password != "") {
+      Serial.println("use stored wifi configuration");
+
       // Use stored credentials to configure the AutoConnect
       config.bootUri = AC_ONBOOTURI_HOME;
       portal.config(config);
-      portal.begin(ssid.c_str(), password.c_str());
-    }
+      portal.begin(ssid.c_str(), password.c_str(), 5000);
 
-    config.autoRise = false;
+      Serial.println("wifi has been connected");
+    }
 
     portal.config(config);
     portal.begin();
@@ -405,7 +412,6 @@ void accessPoint() {
       config.autoReset = false;
       config.autoReconnect = true;
       config.reconnectInterval = 1;  // 30s
-      config.beginTimeout = 10000UL;
       config.portalTimeout = 180000;
 
       // start portal (any key pressed on startup)
@@ -688,6 +694,13 @@ void lnMain() {
     if (key_val == "*") {
       unConfirmed = false;
     } else if (key_val == "#") {
+      if (noSats.toInt() == 0) {
+        error("ZERO SATS");
+        delay(3000);
+        isLNMoneyNumber(true);
+        continue;
+      }
+
       // request invoice
       processing("FETCHING INVOICE");
       if (!getInvoice()) {
@@ -1393,12 +1406,6 @@ bool getInvoice() {
     return false;
   }
 
-  if (noSats.toInt() == 0) {
-    error("ZERO SATS");
-    delay(1000);
-    return false;
-  }
-
   const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
@@ -1493,20 +1500,34 @@ void to_upper(char *arr) {
 }
 
 void makeLNURL() {
+  if (amountToShow.toFloat() == 0) {
+    error("ZERO VALUE");
+    delay(3000);
+    return;
+  }
+
   randomPin = random(1000, 9999);
   byte nonce[8];
   for (int i = 0; i < 8; i++) {
     nonce[i] = random(256);
   }
 
+  int multipler = pow(10, 2);
+
+  if (currencyPoS == "sat") {
+    multipler = 1;
+  }
+
+  float total = amountToShow.toFloat() * multipler;
+
   byte payload[51];  // 51 bytes is max one can get with xor-encryption
   if (selection == "Offline PoS") {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, amountToShow.toFloat() * pow(10, 2));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLPoS + "?p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   } else  // ATM
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, amountToShow.toFloat() * pow(10, 2));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLATM + "?atm=1&p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
