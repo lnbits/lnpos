@@ -4,6 +4,8 @@
 #include <Preferences.h>
 #include <SPIFFS.h>
 #include <math.h>
+#include <stdbool.h>
+#include <ctype.h>
 using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
@@ -273,6 +275,21 @@ AutoConnectConfig config;
 AutoConnectAux elementsAux;
 AutoConnectAux saveAux;
 
+
+bool isInteger(const char *str) {
+  if (*str == '-' || *str == '+') {
+    str++;
+  }
+  while (*str) {
+    if (!isdigit(*str)) {
+      return false;
+    }
+    str++;
+  }
+  return true;
+}
+
+
 void formatNumber(float number, int decimalplaces, char *output) {
   // Create a format string based on the decimalplaces
   char formatString[10];
@@ -338,7 +355,6 @@ void loop() {
   dataIn = "0";
   formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
   amountToShow = decimalplacesOutput;
-  ;
   unConfirmed = true;
   key_val = "";
 
@@ -607,7 +623,6 @@ void getParams() {
     const char *lnurlATMPinChar = lnurlATMPinRoot["value"];
     lnurlATMPin = lnurlATMPinChar;
 
-
     const JsonObject decimalplacesRoot = doc[9];
     const char *decimalplacesChar = decimalplacesRoot["value"];
     decimalplaces = decimalplacesChar;
@@ -677,6 +692,10 @@ void onchainMain() {
 
 void lnMain() {
   if (converted == 0) {
+    if (!checkOnlineParams()) {
+      return;
+    }
+
     processing("FETCHING FIAT RATE");
     if (!getSats()) {
       error("FETCHING FIAT RATE FAILED");
@@ -773,6 +792,10 @@ void lnurlPoSMain() {
   inputs = "";
   pinToShow = "";
   dataIn = "";
+
+  if (!checkOfflineParams()) {
+    return;
+  }
 
   isLNURLMoneyNumber(true);
 
@@ -1349,6 +1372,58 @@ void menuLoop() {
       }
     }
   }
+}
+
+bool checkOnlineParams() {
+  if (invoice != "" && invoice.length() != 32) {
+    error("WRONG INVOICE");
+    delay(3000);
+    return false;
+  }
+  
+  if (!isInteger(decimalplaces.c_str())) {
+    error("WRONG DECIMAL");
+    delay(3000);
+    return false;
+  }
+
+  lnbitsServer.toLowerCase();
+
+  if (lnbitsServer != "") {
+    const char *lnServer = lnbitsServer.c_str();
+    char lastChar = lnServer[strlen(lnServer) - 1];
+
+    if (lnbitsServer.substring(0, 4) != "http" || lastChar == '/') {
+      error("WRONG LNBITS");
+      delay(3000);
+
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool checkOfflineParams() {
+  if (baseURLPoS != "" && baseURLPoS.substring(0, 4) != "http") {
+    error("WRONG LNURLPoS");
+    delay(3000);
+    return false;
+  }
+
+  if (baseURLATM != "" && baseURLATM.substring(0, 4) != "http") {
+    error("WRONG LNURLATM");
+    delay(3000);
+    return false;
+  }
+
+  if (!isInteger(decimalplaces.c_str())) {
+    error("WRONG DECIMAL");
+    delay(3000);
+    return false;
+  }
+
+  return true;
 }
 
 //////////LIGHTNING//////////////////////
