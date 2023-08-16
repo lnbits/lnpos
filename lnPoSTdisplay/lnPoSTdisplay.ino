@@ -1393,6 +1393,12 @@ bool getInvoice() {
     return false;
   }
 
+  if (noSats.toInt() == 0) {
+    error("ZERO SATS");
+    delay(1000);
+    return false;
+  }
+
   const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
@@ -1495,12 +1501,12 @@ void makeLNURL() {
 
   byte payload[51];  // 51 bytes is max one can get with xor-encryption
   if (selection == "Offline PoS") {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - decimalplaces.toInt()));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, amountToShow.toFloat() * pow(10, 2));
     preparedURL = baseURLPoS + "?p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   } else  // ATM
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, dataIn.toInt() * pow(10, 2 - decimalplaces.toInt()));
+    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, amountToShow.toFloat() * pow(10, 2));
     preparedURL = baseURLATM + "?atm=1&p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
@@ -1697,8 +1703,8 @@ void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType) {
   }
 }
 
-/*
- * Get the keypad type
+/* 
+ * Get the keypad type 
  */
 boolean isLilyGoKeyboard() {
   if (colPins[0] == 33) {
