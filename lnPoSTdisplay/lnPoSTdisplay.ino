@@ -4,23 +4,18 @@
 #include <Preferences.h>
 #include <SPIFFS.h>
 #include <math.h>
-#include <stdbool.h>
-#include <ctype.h>
 using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
-
 #include <Keypad.h>
 #include <AutoConnect.h>
 #include <SPI.h>
-//#include <Wire.h>
 #include <TFT_eSPI.h>
 #include <Hash.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
-//#include "esp_adc_cal.h"
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
@@ -64,22 +59,24 @@ String addressNo;
 String pinToShow;
 String decimalplaces = "2";
 String amountToShow = "0";
+String key_val;
+String selection;
+String lnurlATMPin;
 const char menuItems[5][13] = { "LNPoS", "Offline PoS", "OnChain", "ATM", "Settings" };
+const char currencyItems[3][5] = { "sat", "USD", "EUR" };
 char decimalplacesOutput[20];
 int menuItemCheck[5] = { 0, 0, 0, 0, 1 };
-double amountToShowNumber;
-String selection;
 int menuItemNo = 0;
+int currencyItemNo = 0;
 int randomPin;
 int calNum = 1;
 int sumFlag = 0;
 int converted = 0;
-bool isSleepEnabled = true;
 int sleepTimer = 30;  // Time in seconds before the device goes to sleep
-bool isPretendSleeping = false;
 int qrScreenBrightness = 180;  // 0 = min, 255 = max
 long timeOfLastInteraction = millis();
-String key_val;
+bool isSleepEnabled = true;
+bool isPretendSleeping = false;
 bool onchainCheck = false;
 bool lnCheck = false;
 bool lnurlCheck = false;
@@ -87,7 +84,7 @@ bool unConfirmed = true;
 bool selected = false;
 bool lnurlCheckPoS = false;
 bool lnurlCheckATM = false;
-String lnurlATMPin;
+double amountToShowNumber;
 enum InvoiceType {
   LNPOS,
   LNURLPOS,
@@ -148,7 +145,7 @@ static const char PAGE_ELEMENTS[] PROGMEM = R"(
     {
       "name": "lncurrency",
       "type": "ACInput",
-      "label": "PoS Currency ie EUR"
+      "label": "PoS Currency. ie: EUR"
     },
     {
       "name": "heading2",
@@ -592,8 +589,8 @@ void getParams() {
     }
 
     const JsonObject lncurrencyRoot = doc[4];
-    const char *lncurrencyChar = lncurrencyRoot["value"];
-    lncurrency = lncurrencyChar;
+    const char *lncurrencChar = lncurrencyRoot["value"];
+    lncurrency = lncurrencChar;
 
     const JsonObject lnurlPoSRoot = doc[5];
     const char *lnurlPoSChar = lnurlPoSRoot["value"];
@@ -691,17 +688,21 @@ void onchainMain() {
 }
 
 void lnMain() {
-  if (converted == 0) {
-    if (!checkOnlineParams()) {
-      return;
-    }
+  getParams();
 
-    processing("FETCHING FIAT RATE");
-    if (!getSats()) {
-      error("FETCHING FIAT RATE FAILED");
-      delay(3000);
-      return;
-    }
+  if (!checkOnlineParams()) {
+    return;
+  }
+
+  if (lncurrency == "" || lncurrency == "default") {
+    currencyLoop();
+  }
+
+  processing("FETCHING FIAT RATE");
+  if (!getSats()) {
+    error("FETCHING FIAT RATE FAILED");
+    delay(3000);
+    return;
   }
 
   isLNMoneyNumber(true);
@@ -1278,7 +1279,6 @@ void updateBatteryStatus(bool force = false) {
   if (batteryPercentage == USB_POWER) {
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     batteryPercentageText = " USB";
-
   } else {
     if (batteryPercentage >= 60) {
       tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1303,6 +1303,64 @@ void updateBatteryStatus(bool force = false) {
 
   tft.setCursor(190, 120);
   tft.print(batteryPercentageText);
+}
+
+void currencyLoop() {
+  // footer/header
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextSize(2);
+  tft.setCursor(0, 10);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.print("      - CURRENCY -");
+  tft.setCursor(0, 120);
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.print(" *NEXT #SELECT");
+
+  updateBatteryStatus(true);
+
+  bool currencySelected = true;
+
+  while (currencySelected) {
+    maybeSleepDevice();
+    tft.setCursor(0, 40);
+    tft.setTextSize(2);
+
+    int menuItemCount = 0;
+
+    for (int i = 0; i < sizeof(currencyItems) / sizeof(currencyItems[0]); i++) {
+      if (currencyItems[i] == currencyItems[currencyItemNo]) {
+        tft.setTextColor(TFT_GREEN, TFT_BLACK);
+        lncurrency = currencyItems[i];
+      } else {
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+      }
+
+      tft.print("  ");
+      tft.println(currencyItems[i]);
+      menuItemCount++;
+    }
+
+    bool btnloop = true;
+    while (btnloop) {
+      maybeSleepDevice();
+      key_val = "";
+      getKeypad(false, true, false, false);
+
+      if (key_val == "*") {
+        currencyItemNo++;
+        currencyItemNo %= sizeof(currencyItems) / sizeof(currencyItems[0]);
+
+        btnloop = false;
+      } else if (key_val == "#") {
+        currencySelected = false;
+        btnloop = false;
+      } else {
+        updateBatteryStatus();
+        delay(100);
+      }
+    }
+  }
 }
 
 void menuLoop() {
@@ -1381,7 +1439,8 @@ bool checkOnlineParams() {
     return false;
   }
   
-  if (!isInteger(decimalplaces.c_str())) {
+  const char *decimal = decimalplaces.c_str();
+  if (!isInteger(decimal)) {
     error("WRONG DECIMAL");
     delay(3000);
     return false;
@@ -1427,6 +1486,7 @@ bool checkOfflineParams() {
 }
 
 //////////LIGHTNING//////////////////////
+
 bool getSats() {
   WiFiClientSecure client;
   client.setInsecure();  //Some versions of WiFiClientSecure need this
