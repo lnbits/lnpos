@@ -1452,7 +1452,7 @@ bool checkOnlineParams() {
     const char *lnServer = lnbitsServer.c_str();
     char lastChar = lnServer[strlen(lnServer) - 1];
 
-    if (llastChar == '/') {
+    if (lastChar == '/') {
       error("WRONG LNBITS");
       delay(3000);
 
