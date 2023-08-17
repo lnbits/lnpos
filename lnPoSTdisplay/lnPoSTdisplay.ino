@@ -67,7 +67,6 @@ const char currencyItems[3][5] = { "sat", "USD", "EUR" };
 char decimalplacesOutput[20];
 int menuItemCheck[5] = { 0, 0, 0, 0, 1 };
 int menuItemNo = 0;
-int currencyItemNo = 0;
 int randomPin;
 int calNum = 1;
 int sumFlag = 0;
@@ -1311,7 +1310,7 @@ void currencyLoop() {
   tft.setTextSize(2);
   tft.setCursor(0, 10);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.print("      - CURRENCY -");
+  tft.print("    - CURRENCY -");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -1320,6 +1319,7 @@ void currencyLoop() {
   updateBatteryStatus(true);
 
   bool currencySelected = true;
+  int currencyItemNo = 0;
 
   while (currencySelected) {
     maybeSleepDevice();
