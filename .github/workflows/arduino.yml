@@ -26,10 +26,18 @@ jobs:
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           sketch-paths: |
-            - bitcoinSwitch
+            - lnPoSTdisplay
           libraries: |
             - name: WebSockets
             - name: ArduinoJson
+            - name: AutoConnect
+            - name: Base64
+            - name: Keypad
+            - name: PageBuilder
+            - name: uBitcoin
+            - source-path: ./lnPoSTdisplay/libraries/TFT_eSPI
+            - source-path: ./lnPoSTdisplay/libraries/QRCode
+
           cli-compile-flags: |
             - --warnings="none"
 
