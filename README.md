@@ -77,7 +77,7 @@ Launch portal and enter the string from the LNURLDevice extension on LNbits
 
 Purchasing:
 - The Lilygo <a href="https://www.aliexpress.com/item/33048962331.html">Tdisplay</a> is a cheap and small ESP32/screen development board.
-- You can either attach a <a href="https://www.aliexpress.com/item/32993999306.html">keypad membrane</a> or use the <a href="https://www.aliexpress.com/item/1005003589706292.html">breakout board</a> Lilygo specifically made for the LNURLPoS!
+- You can either attach a <a href="https://www.aliexpress.com/item/32812109541.html">keypad membrane</a> or use the <a href="https://www.aliexpress.com/item/1005003589706292.html">breakout board</a> Lilygo specifically made for the LNURLPoS!
 - Any 3.7V lithium iron flat battery with 1.25mm JST connector should be fine. Go for at least 1000 mAh. If you want the battery to fit inside the <a href="https://www.aliexpress.com/item/1005003589706292.html">breakout board</a>, max. dimensions are 40x52x11mm. Example <a href="https://aliexpress.com/item/32948764265.html">1100 mAh 3.7V battery</a>.
 
 Software installation:
