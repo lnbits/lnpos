@@ -4,5 +4,8 @@ arduino-cli config --additional-urls https://raw.githubusercontent.com/espressif
 arduino-cli core update-index
 arduino-cli core install esp32:esp32
 arduino-cli upgrade
-arduino-cli lib install WebSockets ArduinoJson AutoConnect Base64 Keypad PageBuilder TFT_eSPI uBitcoin
-arduino-cli compile --library ./libraries/QRCode --build-path build --fqbn esp32:esp32:ttgo-lora32 lnPoSTdisplay
+arduino-cli lib install WebSockets ArduinoJson AutoConnect Base64 Keypad PageBuilder uBitcoin
+arduino-cli compile \
+    --library ./lnPoSTdisplay/libraries/TFT_eSPI \
+    --library ./lnPoSTdisplay/libraries/QRCode \
+    --build-path build --fqbn esp32:esp32:ttgo-lora32 lnPoSTdisplay
