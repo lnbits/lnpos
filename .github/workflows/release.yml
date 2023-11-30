@@ -49,5 +49,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
         run: |
-          gh release create "$tag" --generate-notes ./build/lnPoSTdisplay.ino.bootloader.bin \
-            ./build/lnPoSTdisplay.ino.bin ./build/lnPoSTdisplay.ino.partitions.bin
+          gh release create "$tag" --generate-notes ./build/lnpos.ino.bootloader.bin \
+            ./build/lnpos.ino.bin ./build/lnpos.ino.partitions.bin

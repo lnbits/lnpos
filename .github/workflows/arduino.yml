@@ -8,12 +8,6 @@ jobs:
       matrix:
         fqbn:
           - esp32:esp32:esp32
-          # - esp32:esp32:esp32s3
-          # - esp32:esp32:esp32c3
-          # future bluetooth chips
-          #- esp32:esp32:esp32c2
-          #- esp32:esp32:esp32c6
-          #- esp32:esp32:esp32h2
 
     steps:
       - uses: actions/checkout@v3
@@ -26,7 +20,7 @@ jobs:
             - name: esp32:esp32
               source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           sketch-paths: |
-            - lnPoSTdisplay
+            - lnpos
           libraries: |
             - name: WebSockets
             - name: ArduinoJson
@@ -35,8 +29,8 @@ jobs:
             - name: Keypad
             - name: PageBuilder
             - name: uBitcoin
-            - source-path: ./lnPoSTdisplay/libraries/TFT_eSPI
-            - source-path: ./lnPoSTdisplay/libraries/QRCode
+            - source-path: ./libraries/TFT_eSPI
+            - source-path: ./libraries/QRCode
 
           cli-compile-flags: |
             - --warnings="none"
