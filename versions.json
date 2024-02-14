@@ -1,0 +1,7 @@
+{
+  "name": "lnpos",
+  "devices": [
+    "esp32"
+  ],
+  "versions": []
+}
