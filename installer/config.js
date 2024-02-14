@@ -20,15 +20,63 @@ export const addressesAndFiles = [
 export const configPath = "elements.json";
 export const elements = [
   {
-    name: "config_ssid",
+    name: "config_lnurlpos",
     value: "",
-    label: "WiFi SSID",
+    label: "LNURL PoS",
     type: "text",
   },
   {
-    name: "config_wifi_password",
+    name: "config_lnurlatm",
     value: "",
-    label: "WiFi Password",
+    label: "LNURL ATM",
+    type: "text",
+  },
+  {
+    name: "config_password",
+    value: "",
+    label: "Device Password",
+    type: "text",
+  },
+  {
+    name: "config_masterkey",
+    value: "",
+    label: "Onchain Master Public Key",
+    type: "text",
+  },
+  {
+    name: "config_server",
+    value: "",
+    label: "LNbits Server",
+    type: "text",
+  },
+  {
+    name: "config_invoice",
+    value: "",
+    label: "Wallet Invoice Key",
+    type: "text",
+  },
+  {
+    name: "config_lncurrency",
+    value: "",
+    label: "PoS Currency. ie: EUR",
+    type: "text",
+  },
+  {
+    name: "config_lnurlatmms",
+    value: "",
+    label: "Mempool.space Server",
+    type: "text",
+  },
+  {
+    name: "config_lnurlatmpin",
+    value: "",
+    label: "LNURLATM pin String",
+    type: "text",
+  },
+  {
+    name: "config_decimalplaces",
+    value: "",
+    label: "FIAT Decimal Places",
     type: "text",
   },
 ];
