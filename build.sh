@@ -6,6 +6,8 @@ arduino-cli core install esp32:esp32
 arduino-cli upgrade
 arduino-cli lib install WebSockets ArduinoJson AutoConnect Base64 Keypad PageBuilder uBitcoin
 arduino-cli compile \
+    --build-property "build.partitions=min_spiffs" \
+    --build-property "upload.maximum_size=1966080" \
     --library ./libraries/TFT_eSPI \
     --library ./libraries/QRCode \
     --build-path build --fqbn esp32:esp32:ttgo-lora32 lnpos
