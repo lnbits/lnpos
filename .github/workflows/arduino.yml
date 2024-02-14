@@ -34,6 +34,10 @@ jobs:
 
           cli-compile-flags: |
             - --warnings="none"
+            - --build-property
+            - build.partitions=min_spiffs
+            - --build-property
+            - upload.maximum_size=1966080
 
       - uses: actions/upload-artifact@v2
         with:
