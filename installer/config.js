@@ -79,4 +79,16 @@ export const elements = [
     label: "FIAT Decimal Places",
     type: "text",
   },
+  {
+    name: "config_wifi_ssid",
+    value: "",
+    label: "WiFi SSID",
+    type: "text",
+  },
+  {
+    name: "config_wifi_password",
+    value: "",
+    label: "WiFi Password",
+    type: "text",
+  },
 ];
