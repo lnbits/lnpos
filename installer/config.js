@@ -22,7 +22,7 @@ export const elements = [
   {
     name: "config_lnurlpos",
     value: "",
-    label: "LNURL PoS",
+    label: "LNURLPoS string from LNURLDevices extension",
     type: "text",
   },
   {
