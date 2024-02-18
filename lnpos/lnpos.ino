@@ -1,14 +1,12 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <FS.h>
-#include <Preferences.h>
 #include <SPIFFS.h>
 #include <math.h>
 using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
 #include <Keypad.h>
-#include <AutoConnect.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <Hash.h>
@@ -16,6 +14,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <stdio.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
+#include <WiFiClientSecure.h>
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
@@ -25,8 +24,27 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 
 bool format = false;
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////LNPOS WILL LOOK FOR DETAILS SET///////////// 
+////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
+///////////OPTIONALLY SET HARDCODED DETAILS/////////////
+////////////////////////////////////////////////////////
 
+bool hardcoded = true; /// Set to true to hardcode
+
+String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
+String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
+String lnbitsServer = "https://legend.lnbits.com";
+String invoice = "37d45d3e1f0d4572a905bad544588d7d";
+String lncurrency = "GBP";
+String lnurlATMMS = "https://mempool.space";
+String lnurlATMPin = "878787";
+String decimalplaces = "2";
+String ssid = "AlansBits";
+String password = "ithurtswhenip";
+
+//////////////////////////////////////////////////
 
 // variables
 String inputs;
@@ -36,32 +54,25 @@ String nosats;
 String cntr = "0";
 String lnurl;
 String currency;
-String lncurrency;
 String key;
 String preparedURL;
 String baseURL;
-String apPassword = "ToTheMoon1";  //default WiFi AP password
-String masterKey;
-String lnbitsServer;
-String invoice;
 String baseURLPoS;
 String secretPoS;
 String currencyPoS;
 String baseURLATM;
 String secretATM;
 String currencyATM;
-String lnurlATMMS;
 String dataIn = "0";
 String noSats = "0";
 String qrData;
 String dataId;
 String addressNo;
 String pinToShow;
-String decimalplaces = "2";
 String amountToShow = "0";
 String key_val;
 String selection;
-String lnurlATMPin;
+
 const char menuItems[5][13] = { "LNPoS", "Offline PoS", "OnChain", "ATM", "Settings" };
 const char currencyItems[3][5] = { "sat", "USD", "EUR" };
 char decimalplacesOutput[20];
@@ -91,153 +102,6 @@ enum InvoiceType {
   LNURLATM,
   PORTAL
 };
-Preferences preferences;
-
-// custom access point pages
-static const char PAGE_ELEMENTS[] PROGMEM = R"(
-{
-  "uri": "/posconfig",
-  "title": "PoS Options",
-  "menu": true,
-  "element": [
-    {
-      "name": "text",
-      "type": "ACText",
-      "value": "LNPoS options",
-      "style": "font-family:Arial;font-size:16px;font-weight:400;color:#191970;margin-botom:15px;"
-    },
-    {
-      "name": "password",
-      "type": "ACInput",
-      "label": "Password for PoS AP WiFi",
-      "value": "ToTheMoon1"
-    },
-
-    {
-      "name": "offline",
-      "type": "ACText",
-      "value": "Onchain *optional",
-      "style": "font-family:Arial;font-size:16px;font-weight:400;color:#191970;margin-botom:15px;"
-    },
-    {
-      "name": "masterkey",
-      "type": "ACInput",
-      "label": "Master Public Key"
-    },
-
-    {
-      "name": "heading1",
-      "type": "ACText",
-      "value": "Lightning *optional",
-      "style": "font-family:Arial;font-size:16px;font-weight:400;color:#191970;margin-botom:15px;"
-    },
-    {
-      "name": "server",
-      "type": "ACInput",
-      "label": "LNbits Server"
-    },
-    {
-      "name": "invoice",
-      "type": "ACInput",
-      "label": "Wallet Invoice Key"
-    },
-    {
-      "name": "lncurrency",
-      "type": "ACInput",
-      "label": "PoS Currency. ie: EUR"
-    },
-    {
-      "name": "heading2",
-      "type": "ACText",
-      "value": "Offline Lightning *optional",
-      "style": "font-family:Arial;font-size:16px;font-weight:400;color:#191970;margin-botom:15px;"
-    },
-    {
-      "name": "lnurlpos",
-      "type": "ACInput",
-      "label": "LNURLPoS String"
-    },
-    {
-      "name": "heading3",
-      "type": "ACText",
-      "value": "Offline Lightning *optional",
-      "style": "font-family:Arial;font-size:16px;font-weight:400;color:#191970;margin-botom:15px;"
-    },
-    {
-      "name": "lnurlatm",
-      "type": "ACInput",
-      "label": "LNURLATM String"
-    },
-    {
-      "name": "lnurlatmms",
-      "type": "ACInput",
-      "value": "mempool.space",
-      "label": "mempool.space server"
-    },
-    {
-      "name": "lnurlatmpin",
-      "type": "ACInput",
-      "value": "878787",
-      "label": "LNURLATM pin String"
-    },
-    {
-      "name": "decimalplaces",
-      "type": "ACInput",
-      "value": "2",
-      "label": "Fiat decimal places"
-    },
-    {
-      "name": "load",
-      "type": "ACSubmit",
-      "value": "Load",
-      "uri": "/posconfig"
-    },
-    {
-      "name": "save",
-      "type": "ACSubmit",
-      "value": "Save",
-      "uri": "/save"
-    },
-    {
-      "name": "adjust_width",
-      "type": "ACElement",
-      "value": "<script type='text/javascript'>window.onload=function(){var t=document.querySelectorAll('input[]');for(i=0;i<t.length;i++){var e=t[i].getAttribute('placeholder');e&&t[i].setAttribute('size',e.length*.8)}};</script>"
-    }
-  ]
- }
-)";
-
-static const char PAGE_SAVE[] PROGMEM = R"(
-{
-  "uri": "/save",
-  "title": "Elements",
-  "menu": false,
-  "element": [
-    {
-      "name": "caption",
-      "type": "ACText",
-      "format": "Elements have been saved to %s",
-      "style": "font-family:Arial;font-size:18px;font-weight:400;color:#191970"
-    },
-    {
-      "name": "validated",
-      "type": "ACText",
-      "style": "color:red"
-    },
-    {
-      "name": "echo",
-      "type": "ACText",
-      "style": "font-family:monospace;font-size:small;white-space:pre;"
-    },
-    {
-      "name": "ok",
-      "type": "ACSubmit",
-      "value": "OK",
-      "uri": "/posconfig"
-    }
-  ]
-}
-)";
 
 SHA256 h;
 TFT_eSPI tft = TFT_eSPI();
@@ -264,13 +128,6 @@ struct KeyValue {
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 int checker = 0;
 char maxdig[20];
-
-WebServerClass server;
-AutoConnect portal(server);
-AutoConnectConfig config;
-AutoConnectAux elementsAux;
-AutoConnectAux saveAux;
-
 
 bool isInteger(const char *str)
 {
@@ -309,12 +166,6 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(true);
 
-  config.beginTimeout = 10000UL;
-
-  portal.join({ elementsAux, saveAux });
-
-  logo();
-
   // load buttons
   h.begin();
   FlashFS.begin(FORMAT_ON_FAIL);
@@ -322,33 +173,30 @@ void setup()
   if (format == true) {
     SPIFFS.format();
   }
-  getParams();
-
+  readFiles();
+  logo();
   // connect to configured WiFi
-  Serial.println("connect to configured WiFi");
+  int wifiCounter = 0;
   if (menuItemCheck[0])
   {
-    preferences.begin("wifi", false);                         // Open Preferences with read-only
-    String ssid = preferences.getString("ssid", "");          // Get stored SSID
-    String password = preferences.getString("password", "");  // Get stored password
-    preferences.end();
+    delay(1000);
+    processing("Connecting to wifi");
+    WiFi.mode(WIFI_STA); //Optional
+    WiFi.begin(ssid, password);
 
-    config.autoRise = false;
-
-    if (ssid != "" && password != "")
-    {
-      Serial.println("use stored wifi configuration");
-
-      // Use stored credentials to configure the AutoConnect
-      config.bootUri = AC_ONBOOTURI_HOME;
-      portal.config(config);
-      portal.begin(ssid.c_str(), password.c_str(), 5000);
-
-      Serial.println("wifi has been connected");
+    while(WiFi.status() != WL_CONNECTED && wifiCounter < 30){
+      Serial.print(".");
+      delay(100);
+      wifiCounter++;
     }
-
-    portal.config(config);
-    portal.begin();
+    if(WiFi.status() == WL_CONNECTED){
+      processing("Connected to wifi");
+      delay(3000);
+    }
+    else{
+      error("Error", "WiFi failed", "");
+      delay(3000);
+    }
   }
 
   delay(2000);
@@ -419,10 +267,20 @@ void loop()
   }
 }
 
+String getJsonValue(JsonDocument &doc, const char* name)
+{
+    for (JsonObject elem : doc.as<JsonArray>()) {
+        if (strcmp(elem["name"], name) == 0) {
+            String value = elem["value"].as<String>();
+            return value;
+        }
+    }
+    return "";
+}
+
 void accessPoint()
 {
-  getParams();
-
+  readFiles();
   pinToShow = "";
   dataIn = "";
   isATMMoneyPin(true);
@@ -452,13 +310,7 @@ void accessPoint()
     }
     else if (pinToShow == lnurlATMPin)
     {
-      error("   SETTINGS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
-      // general WiFi setting
-      config.autoReset = false;
-      config.autoReconnect = true;
-      config.reconnectInterval = 1;  // 30s
-      config.portalTimeout = 180000;
-
+      error("   SETTINGS", "HOLD 1 FOR USB", "");
       // start portal (any key pressed on startup)
       int count = 0;
       while (count < 10)
@@ -477,111 +329,6 @@ void accessPoint()
             return;
           }
         }
-        else if (key != NO_KEY)
-        {
-          // handle access point traffic
-          server.on("/", []()
-          {
-            String content = "<h1>LNPoS</br>Free open-source bitcoin PoS</h1>";
-            content += AUTOCONNECT_LINK(COG_24);
-            server.send(200, "text/html", content);
-          });
-
-          elementsAux.load(FPSTR(PAGE_ELEMENTS));
-          elementsAux.on([](AutoConnectAux &aux, PageArgument &arg)
-          {
-            File param = FlashFS.open(PARAM_FILE, "r");
-            if (param)
-            {
-              aux.loadElement(param, { "password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces" });
-              param.close();
-            }
-
-            if (portal.where() == "/posconfig")
-            {
-              File param = FlashFS.open(PARAM_FILE, "r");
-              if (param)
-              {
-                aux.loadElement(param, { "password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces" });
-                param.close();
-              }
-            }
-            return String();
-          });
-
-          saveAux.load(FPSTR(PAGE_SAVE));
-          saveAux.on([](AutoConnectAux &aux, PageArgument &arg)
-          {
-            aux["caption"].value = PARAM_FILE;
-            File param = FlashFS.open(PARAM_FILE, "w");
-
-            if (param)
-            {
-              // save as a loadable set for parameters.
-              elementsAux.saveElement(param, { "password", "masterkey", "server", "invoice", "lncurrency", "lnurlpos", "lnurlatm", "lnurlatmms", "lnurlatmpin", "decimalplaces" });
-              param.close();
-
-              // read the saved elements again to display.
-              param = FlashFS.open(PARAM_FILE, "r");
-              aux["echo"].value = param.readString();
-              param.close();
-            }
-            else
-            {
-              aux["echo"].value = "Filesystem failed to open.";
-            }
-
-            return String();
-          });
-
-          config.immediateStart = true;
-          config.ticker = true;
-          config.apid = "LNPoS-" + String((uint32_t)ESP.getEfuseMac(), HEX);
-          config.psk = apPassword;
-          config.menuItems = AC_MENUITEM_CONFIGNEW | AC_MENUITEM_OPENSSIDS | AC_MENUITEM_RESET;
-          config.title = "LNPoS";
-
-          // start access point
-          Serial.println("wifi ap mode");
-          WiFi.mode(WIFI_AP);
-          portalLaunch();
-
-          Serial.println("create wifi page");
-
-          config.retainPortal = true;
-          config.autoRise = false;
-          Serial.println("apply captive portal");
-          portal.config(config);
-          portal.onConnect(onConnect);
-          Serial.println("ready to set wifi ap");
-          portal.begin();
-          Serial.println("wifi ap already started");
-          config.autoRise = true;
-          portal.config(config);
-
-          Serial.println("waiting keyboard...");
-
-          while (true)
-          {
-            key_val = "";
-            getKeypad(false, true, false, false);
-            if (key_val == "*")
-            {
-              unConfirmed = false;
-              portal.end();
-              config.autoRise = false;
-              portal.config(config);
-              portal.begin();
-              Serial.println("connect ap");
-              ESP.restart();
-              return;
-            }
-
-            portal.handleClient();
-
-            delay(100);
-          }
-        }
       }
     }
     else
@@ -591,100 +338,6 @@ void accessPoint()
   }
 }
 
-String onConnect(IPAddress &ip)
-{
-  Preferences preferences;
-  preferences.begin("wifi", false);  // Open Preferences with read-write
-
-  String ssid = WiFi.SSID();     // Get the connected SSID
-  String password = WiFi.psk();  // Get the connected password
-
-  preferences.putString("ssid", ssid);
-  preferences.putString("password", password);
-  preferences.end();
-
-  Serial.println("Credentials saved");
-  return String();
-}
-
-void getParams()
-{
-  // get the saved details and store in global variables
-  File paramFile = FlashFS.open(PARAM_FILE, "r");
-  if (paramFile)
-  {
-    StaticJsonDocument<2500> doc;
-    DeserializationError error = deserializeJson(doc, paramFile.readString());
-
-    const JsonObject passRoot = doc[0];
-    const char *apPasswordChar = passRoot["value"];
-    const char *apNameChar = passRoot["name"];
-    if (String(apPasswordChar) != "" && String(apNameChar) == "password")
-    {
-      apPassword = apPasswordChar;
-    }
-
-    const JsonObject maRoot = doc[1];
-    const char *masterKeyChar = maRoot["value"];
-    masterKey = masterKeyChar;
-    if (masterKey != "")
-    {
-      menuItemCheck[2] = 1;
-    }
-
-    const JsonObject serverRoot = doc[2];
-    const char *serverChar = serverRoot["value"];
-    lnbitsServer = serverChar;
-
-    const JsonObject invoiceRoot = doc[3];
-    const char *invoiceChar = invoiceRoot["value"];
-    invoice = invoiceChar;
-    if (invoice != "")
-    {
-      menuItemCheck[0] = 1;
-    }
-
-    const JsonObject lncurrencyRoot = doc[4];
-    const char *lncurrencyChar = lncurrencyRoot["value"];
-    lncurrency = lncurrencyChar;
-
-    const JsonObject lnurlPoSRoot = doc[5];
-    const char *lnurlPoSChar = lnurlPoSRoot["value"];
-    const String lnurlPoS = lnurlPoSChar;
-    baseURLPoS = getValue(lnurlPoS, ',', 0);
-    secretPoS = getValue(lnurlPoS, ',', 1);
-    currencyPoS = getValue(lnurlPoS, ',', 2);
-    if (secretPoS != "")
-    {
-      menuItemCheck[1] = 1;
-    }
-
-    const JsonObject lnurlATMRoot = doc[6];
-    const char *lnurlATMChar = lnurlATMRoot["value"];
-    const String lnurlATM = lnurlATMChar;
-    baseURLATM = getValue(lnurlATM, ',', 0);
-    secretATM = getValue(lnurlATM, ',', 1);
-    currencyATM = getValue(lnurlATM, ',', 2);
-    if (secretATM != "")
-    {
-      menuItemCheck[3] = 1;
-    }
-
-    const JsonObject lnurlATMMSRoot = doc[7];
-    const char *lnurlATMMSChar = lnurlATMMSRoot["value"];
-    lnurlATMMS = lnurlATMMSChar;
-
-    const JsonObject lnurlATMPinRoot = doc[8];
-    const char *lnurlATMPinChar = lnurlATMPinRoot["value"];
-    lnurlATMPin = lnurlATMPinChar;
-
-    const JsonObject decimalplacesRoot = doc[9];
-    const char *decimalplacesChar = decimalplacesRoot["value"];
-    decimalplaces = decimalplacesChar;
-  }
-
-  paramFile.close();
-}
 
 // on-chain payment method
 void onchainMain()
@@ -762,7 +415,7 @@ void onchainMain()
 
 void lnMain()
 {
-  getParams();
+  readFiles();
 
   if (!checkOnlineParams())
   {
@@ -1058,11 +711,6 @@ void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
 }
 
 ///////////DISPLAY///////////////
-void portalLaunch()
-{
-  configLaunch("AP LAUNCHED");
-}
-
 void serialLaunch()
 {
   configLaunch("USB Config");
@@ -1084,7 +732,7 @@ void configLaunch(String title)
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(30, 83);
   tft.setTextSize(2);
-  tft.println(config.apid);
+  // tft.println(config.apid);
 }
 
 void isLNMoneyNumber(bool cleared)
