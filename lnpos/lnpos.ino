@@ -1,7 +1,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <FS.h>
-#include <Preferences.h>
 #include <SPIFFS.h>
 #include <math.h>
 using WebServerClass = WebServer;
@@ -15,6 +14,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <stdio.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
+#include <WiFiClientSecure.h>
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
@@ -24,8 +24,27 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 
 bool format = false;
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////LNPOS WILL LOOK FOR DETAILS SET///////////// 
+////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
+///////////OPTIONALLY SET HARDCODED DETAILS/////////////
+////////////////////////////////////////////////////////
 
+bool hardcoded = true; /// Set to true to hardcode
+
+String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
+String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
+String lnbitsServer = "https://legend.lnbits.com";
+String invoice = "37d45d3e1f0d4572a905bad544588d7d";
+String lncurrency = "GBP";
+String lnurlATMMS = "https://mempool.space";
+String lnurlATMPin = "878787";
+String decimalplaces = "2";
+String ssid = "AlansBits";
+String password = "ithurtswhenip";
+
+//////////////////////////////////////////////////
 
 // variables
 String inputs;
@@ -35,34 +54,25 @@ String nosats;
 String cntr = "0";
 String lnurl;
 String currency;
-String lncurrency;
 String key;
 String preparedURL;
 String baseURL;
-String ssid;
-String password;
-String apPassword = "ToTheMoon1";  //default WiFi AP password
-String masterKey;
-String lnbitsServer;
-String invoice;
 String baseURLPoS;
 String secretPoS;
 String currencyPoS;
 String baseURLATM;
 String secretATM;
 String currencyATM;
-String lnurlATMMS;
 String dataIn = "0";
 String noSats = "0";
 String qrData;
 String dataId;
 String addressNo;
 String pinToShow;
-String decimalplaces = "2";
 String amountToShow = "0";
 String key_val;
 String selection;
-String lnurlATMPin;
+
 const char menuItems[5][13] = { "LNPoS", "Offline PoS", "OnChain", "ATM", "Settings" };
 const char currencyItems[3][5] = { "sat", "USD", "EUR" };
 char decimalplacesOutput[20];
@@ -92,7 +102,6 @@ enum InvoiceType {
   LNURLATM,
   PORTAL
 };
-Preferences preferences;
 
 SHA256 h;
 TFT_eSPI tft = TFT_eSPI();
@@ -119,13 +128,6 @@ struct KeyValue {
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 int checker = 0;
 char maxdig[20];
-
-WebServerClass server;
-AutoConnect portal(server);
-AutoConnectConfig config;
-AutoConnectAux elementsAux;
-AutoConnectAux saveAux;
-
 
 bool isInteger(const char *str)
 {
@@ -164,8 +166,6 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(true);
 
-  logo();
-
   // load buttons
   h.begin();
   FlashFS.begin(FORMAT_ON_FAIL);
@@ -174,24 +174,29 @@ void setup()
     SPIFFS.format();
   }
   readFiles();
-
+  logo();
   // connect to configured WiFi
-  Serial.println("connect to configured WiFi");
+  int wifiCounter = 0;
   if (menuItemCheck[0])
   {
-
+    delay(1000);
+    processing("Connecting to wifi");
     WiFi.mode(WIFI_STA); //Optional
     WiFi.begin(ssid, password);
-    Serial.println("\nConnecting");
 
-    while(WiFi.status() != WL_CONNECTED){
-        Serial.print(".");
-        delay(100);
+    while(WiFi.status() != WL_CONNECTED && wifiCounter < 30){
+      Serial.print(".");
+      delay(100);
+      wifiCounter++;
     }
-
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
+    if(WiFi.status() == WL_CONNECTED){
+      processing("Connected to wifi");
+      delay(3000);
+    }
+    else{
+      error("Error", "WiFi failed", "");
+      delay(3000);
+    }
   }
 
   delay(2000);
@@ -262,172 +267,15 @@ void loop()
   }
 }
 
-
-void readFiles()
+String getJsonValue(JsonDocument &doc, const char* name)
 {
-    File paramFile = FlashFS.open(PARAM_FILE, "r");
-    if (paramFile)
-    {
-        StaticJsonDocument<2500> doc;
-        DeserializationError error = deserializeJson(doc, paramFile.readString());
-        if(error){
-            Serial.print("deserializeJson() failed: ");
-            Serial.println(error.c_str());
-            return;
-        }
-        lnurlPoS = getJsonValue(doc, "config_lnurlpos");
-        lnurlATM = getJsonValue(doc, "config_lnurlatm");
-        apPassword = getJsonValue(doc, "config_password");
-        masterKey = getJsonValue(doc, "config_masterkey");
-        lnbitsServer = getJsonValue(doc, "config_server");
-        invoice = getJsonValue(doc, "config_invoice");
-        lncurrency = getJsonValue(doc, "config_lncurrency");
-        lnurlATMMS = getJsonValue(doc, "config_lnurlatmms");
-        lnurlATMPin = getJsonValue(doc, "config_lnurlatmpin");
-        decimalplaces = getJsonValue(doc, "config_decimalplaces");
-        ssid = getJsonValue(doc, "config_wifi_ssid");
-        password = getJsonValue(doc, "config_wifi_password");
-////////LNURL PoS string/////////
-        if(lnurlPoS != "null" || lnurlPoS != ""){
-            baseURLPoS = getValue(lnurlPoS, ',', 0);
-            secretPoS = getValue(lnurlPoS, ',', 1);
-            currencyPoS = getValue(lnurlPoS, ',', 2);
-            Serial.println("");
-            Serial.println("lnurlPoS used");
-            Serial.println("lnurlPoS: " + lnurlPoS);
-            if (secretPoS != "")
-            {
-              menuItemCheck[1] = 1;
-            }
-        }
-        else{
-            Serial.println("lnurlPoS not set");
-        }
-////////LNURL ATM string/////////
-
-        if(lnurlATM != "null" || lnurlATM != ""){
-            lnurlATM = getJsonValue(doc, "config_lnurlatm");
-            baseURLATM = getValue(lnurlATM, ',', 0);
-            secretATM = getValue(lnurlATM, ',', 1);
-            currencyATM = getValue(lnurlATM, ',', 2);
-            Serial.println("");
-            Serial.println("lnurlPoS: " + lnurlPoS);
-            if (secretATM != "")
-            {
-              menuItemCheck[3] = 1;
-            } 
-        }
-        else{
-            Serial.println("lnurlATM not set");
-        }
-////////PoS password/////////
-        if(apPassword != "null" || apPassword != ""){
-            apPassword = getJsonValue(doc, "config_password");
-            Serial.println("");
-            Serial.println("PoS password used from memory");
-            Serial.println("PoS password: " + apPassword);
-        }
-        else{
-            Serial.println("SSID password not set");
-        }
-//////////MasterKey/////////
-        if(masterKey != "null" || masterKey != ""){
-            switchStr = getJsonValue(doc, "config_masterkey");
-            Serial.println("");
-            Serial.println("masterKey used from memory");
-            Serial.println("masterKey: " + masterKey);
-            if (masterKey != "")
-            {
-              menuItemCheck[2] = 1;
-            }
-        }
-        else{
-            Serial.println("MasterKey not set");
-        }
-//////////Lnbits Server/////////
-        if(lnbitsServer != "null" || lnbitsServer != ""){
-            lnbitsServer = getJsonValue(doc, "config_server");
-            Serial.println("");
-            Serial.println("lnbitsServer used from memory");
-            Serial.println("lnbitsServer: " + lnbitsServer);
-        }
-        else{
-            Serial.println("lnbitsServer not set");
-        }
-/////////LNbits Server///////
-        if(invoice != "null" || invoice != ""){
-            invoice = getJsonValue(doc, "config_invoice");
-            Serial.println("");
-            Serial.println("invoice key used from memory");
-            Serial.println("invoice key: " + invoice);
-            if (invoice != "")
-            {
-              menuItemCheck[0] = 1;
-            }
-        }
-        else{
-            Serial.println("invoice key not set";
-        }
-/////////PoS Currency///////
-        if(lncurrency != "null" || lncurrency != ""){
-            lncurrency = getJsonValue(doc, "config_lncurrency");
-            Serial.println("");
-            Serial.println("PoS currency used from memory");
-            Serial.println("PoS currency: " + lncurrency);
-        }
-        else{
-            Serial.println("Pos currency not set");
-        }
-/////////mempool.space server///////
-        if(lnurlATMMS != "null" || lnurlATMMS != ""){
-            lnurlATMMS = getJsonValue(doc, "config_lnurlatmms");
-            Serial.println("");
-            Serial.println("mempool.space server used from memory");
-            Serial.println("mempool.space server: " + lnurlATMMS);
-        }
-        else{
-            Serial.println("mempool.space server not set");
-        }
-/////////mATM/Settings pin///////
-        if(lnurlATMPin != "null" || lnurlATMPin != ""){
-            lnurlATMPin = getJsonValue(doc, "config_lnurlatmpin");
-            Serial.println("");
-            Serial.println("ATM/settings security pin used from memory");
-            Serial.println("ATM/settings security pin: " + lnurlATMPin);
-        }
-        else{
-            lnurlATMPin = "878787"
-            Serial.println("ATM/Settings security pin not set using default");
-        }
-/////////no. FIAT decimal places///////
-        if(decimalplaces != "null" || decimalplaces != ""){
-            Serial.println("");
-            Serial.println("no. fiat decimal places used from memory");
-            Serial.println("no. fiat decimal places: " + decimalplaces);
-        }
-        else{
-            Serial.println("no. fiat decimal places not set");
-        }
-/////////WiFi SSID///////
-        if(ssid != "null" || ssid != ""){
-            Serial.println("");
-            Serial.println("WiFi SSID used from memory");
-            Serial.println("WiFi SSID: " + ssid);
-        }
-        else{
-            Serial.println("WiFi SSID not set");
-        }
-/////////WiFi password///////
-        if(decimalplaces != "null" || decimalplaces != ""){
-            Serial.println("");
-            Serial.println("WiFi password used from memory");
-            Serial.println("WiFi password: " + password);
-        }
-        else{
-            Serial.println("WiFi password not set");
+    for (JsonObject elem : doc.as<JsonArray>()) {
+        if (strcmp(elem["name"], name) == 0) {
+            String value = elem["value"].as<String>();
+            return value;
         }
     }
-    paramFile.close();
+    return "";
 }
 
 void accessPoint()
@@ -462,7 +310,7 @@ void accessPoint()
     }
     else if (pinToShow == lnurlATMPin)
     {
-      error("   SETTINGS", "HOLD 1 FOR USB", "ANY OTHER KEY FOR AP");
+      error("   SETTINGS", "HOLD 1 FOR USB", "");
       // start portal (any key pressed on startup)
       int count = 0;
       while (count < 10)
@@ -863,11 +711,6 @@ void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
 }
 
 ///////////DISPLAY///////////////
-void portalLaunch()
-{
-  configLaunch("AP LAUNCHED");
-}
-
 void serialLaunch()
 {
   configLaunch("USB Config");
@@ -889,7 +732,7 @@ void configLaunch(String title)
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(30, 83);
   tft.setTextSize(2);
-  tft.println(config.apid);
+  // tft.println(config.apid);
 }
 
 void isLNMoneyNumber(bool cleared)
