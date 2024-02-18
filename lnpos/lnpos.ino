@@ -175,6 +175,7 @@ void setup()
     SPIFFS.format();
   }
   logo();
+  checkHardcoded();
   readFiles();
 
   // connect to configured WiFi
@@ -284,6 +285,24 @@ String getJsonValue(JsonDocument &doc, const char *name)
     }
   }
   return "";
+}
+
+void checkHardcoded()
+{
+  if (!hardcoded)
+  {
+    lnurlPoS = "";
+    lnurlATM = "";
+    masterKey = "";
+    lnbitsServer = "";
+    invoice = "";
+    lncurrency = "";
+    lnurlATMMS = "";
+    lnurlATMPin = "";
+    decimalplaces = "";
+    ssid = "";
+    password = "";
+  }
 }
 
 void accessPoint()

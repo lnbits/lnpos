@@ -116,19 +116,6 @@ void readFiles()
   {
     if (!hardcoded)
     {
-
-      lnurlPoS = "";
-      lnurlATM = "";
-      masterKey = "";
-      lnbitsServer = "";
-      invoice = "";
-      lncurrency = "";
-      lnurlATMMS = "";
-      lnurlATMPin = "";
-      decimalplaces = "";
-      ssid = "";
-      password = "";
-
       StaticJsonDocument<2500> doc;
       DeserializationError error = deserializeJson(doc, paramFile.readString());
       if (error)
