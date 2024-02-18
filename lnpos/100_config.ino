@@ -116,7 +116,7 @@ void readFiles()
   {
     if (!hardcoded)
     {
-      StaticJsonDocument<2500> doc;
+      StaticJsonDocument<6000> doc;
       DeserializationError error = deserializeJson(doc, paramFile.readString());
       if (error)
       {
@@ -124,6 +124,7 @@ void readFiles()
         Serial.println(error.c_str());
         return;
       }
+
       lnurlPoS = getJsonValue(doc, "config_lnurlpos");
       lnurlATM = getJsonValue(doc, "config_lnurlatm");
       masterKey = getJsonValue(doc, "config_masterkey");
