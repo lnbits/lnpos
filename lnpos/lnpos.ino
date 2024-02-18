@@ -30,7 +30,7 @@ bool format = false;
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
 
-bool hardcoded = true; /// Set to true to hardcode
+bool hardcoded = false; /// Set to true to hardcode
 
 String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
 String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
@@ -174,8 +174,9 @@ void setup()
   {
     SPIFFS.format();
   }
-  readFiles();
   logo();
+  readFiles();
+
   // connect to configured WiFi
   int wifiCounter = 0;
   if (menuItemCheck[0])
