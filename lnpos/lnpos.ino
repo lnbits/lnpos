@@ -18,14 +18,14 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
-#define USB_POWER 1000  // battery percentage sentinel value to indicate USB power
+#define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
 
 //////////SET TO TRUE TO WIPE MEMORY//////////////
 
 bool format = false;
 
 ////////////////////////////////////////////////////////
-////////////LNPOS WILL LOOK FOR DETAILS SET///////////// 
+////////////LNPOS WILL LOOK FOR DETAILS SET/////////////
 ////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
@@ -73,17 +73,17 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = { "LNPoS", "Offline PoS", "OnChain", "ATM", "Settings" };
-const char currencyItems[3][5] = { "sat", "USD", "EUR" };
+const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
-int menuItemCheck[5] = { 0, 0, 0, 0, 1 };
+int menuItemCheck[5] = {0, 0, 0, 0, 1};
 int menuItemNo = 0;
 int randomPin;
 int calNum = 1;
 int sumFlag = 0;
 int converted = 0;
-int sleepTimer = 30;  // Time in seconds before the device goes to sleep
-int qrScreenBrightness = 180;  // 0 = min, 255 = max
+int sleepTimer = 30;          // Time in seconds before the device goes to sleep
+int qrScreenBrightness = 180; // 0 = min, 255 = max
 long timeOfLastInteraction = millis();
 bool isSleepEnabled = true;
 bool isPretendSleeping = false;
@@ -95,7 +95,8 @@ bool selected = false;
 bool lnurlCheckPoS = false;
 bool lnurlCheckATM = false;
 double amountToShowNumber;
-enum InvoiceType {
+enum InvoiceType
+{
   LNPOS,
   LNURLPOS,
   ONCHAIN,
@@ -111,16 +112,16 @@ uint16_t qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness,
 const byte rows = 4;
 const byte cols = 3;
 char keys[rows][cols] = {
-  { '1', '2', '3' },
-  { '4', '5', '6' },
-  { '7', '8', '9' },
-  { '*', '0', '#' }
-};
+    {'1', '2', '3'},
+    {'4', '5', '6'},
+    {'7', '8', '9'},
+    {'*', '0', '#'}};
 
-byte rowPins[rows] = { 21, 27, 26, 22 };  //connect to the row pinouts of the keypad
-byte colPins[cols] = { 33, 32, 25 };      //connect to the column pinouts of the keypad
+byte rowPins[rows] = {21, 27, 26, 22}; // connect to the row pinouts of the keypad
+byte colPins[cols] = {33, 32, 25};     // connect to the column pinouts of the keypad
 
-struct KeyValue {
+struct KeyValue
+{
   String key;
   String value;
 };
@@ -146,7 +147,6 @@ bool isInteger(const char *str)
   return true;
 }
 
-
 void formatNumber(float number, int decimalplaces, char *output)
 {
   // Create a format string based on the decimalplaces
@@ -170,7 +170,8 @@ void setup()
   h.begin();
   FlashFS.begin(FORMAT_ON_FAIL);
   SPIFFS.begin(true);
-  if (format == true) {
+  if (format == true)
+  {
     SPIFFS.format();
   }
   readFiles();
@@ -181,19 +182,22 @@ void setup()
   {
     delay(1000);
     processing("Connecting to wifi");
-    WiFi.mode(WIFI_STA); //Optional
+    WiFi.mode(WIFI_STA); // Optional
     WiFi.begin(ssid, password);
 
-    while(WiFi.status() != WL_CONNECTED && wifiCounter < 30){
+    while (WiFi.status() != WL_CONNECTED && wifiCounter < 30)
+    {
       Serial.print(".");
       delay(100);
       wifiCounter++;
     }
-    if(WiFi.status() == WL_CONNECTED){
+    if (WiFi.status() == WL_CONNECTED)
+    {
       processing("Connected to wifi");
       delay(3000);
     }
-    else{
+    else
+    {
       error("Error", "WiFi failed", "");
       delay(3000);
     }
@@ -240,7 +244,8 @@ void loop()
     {
       accessPoint();
     }
-    if (menuItemsAmount > 1) {
+    if (menuItemsAmount > 1)
+    {
       menuLoop();
     }
 
@@ -267,15 +272,17 @@ void loop()
   }
 }
 
-String getJsonValue(JsonDocument &doc, const char* name)
+String getJsonValue(JsonDocument &doc, const char *name)
 {
-    for (JsonObject elem : doc.as<JsonArray>()) {
-        if (strcmp(elem["name"], name) == 0) {
-            String value = elem["value"].as<String>();
-            return value;
-        }
+  for (JsonObject elem : doc.as<JsonArray>())
+  {
+    if (strcmp(elem["name"], name) == 0)
+    {
+      String value = elem["value"].as<String>();
+      return value;
     }
-    return "";
+  }
+  return "";
 }
 
 void accessPoint()
@@ -337,7 +344,6 @@ void accessPoint()
     }
   }
 }
-
 
 // on-chain payment method
 void onchainMain()
@@ -458,7 +464,8 @@ void lnMain()
 
       // request invoice
       processing("FETCHING INVOICE");
-      if (!getInvoice()) {
+      if (!getInvoice())
+      {
         unConfirmed = false;
         error("ERROR FETCHING INVOICE");
         delay(3000);
@@ -474,18 +481,21 @@ void lnMain()
       {
         int timer = 0;
 
-        if (!isFirstRun) {
+        if (!isFirstRun)
+        {
           unConfirmed = checkInvoice();
           if (!unConfirmed)
           {
             paymentSuccess();
             timer = 5000;
 
-            while (key_val != "*") {
+            while (key_val != "*")
+            {
               key_val = "";
               getKeypad(false, true, false, false);
 
-              if (key_val != "*") {
+              if (key_val != "*")
+              {
                 delay(100);
               }
             }
@@ -506,7 +516,9 @@ void lnMain()
             unConfirmed = false;
             timer = 5000;
             break;
-          } else {
+          }
+          else
+          {
             delay(100);
             handleBrightnessAdjust(key_val, LNPOS);
             key_val = "";
@@ -681,11 +693,13 @@ void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
 
   key_val = String(key);
 
-  if (key_val != "") {
+  if (key_val != "")
+  {
     timeOfLastInteraction = millis();
   }
 
-  if (dataIn.length() < 9) {
+  if (dataIn.length() < 9)
+  {
     dataIn += key_val;
   }
 
@@ -1095,7 +1109,8 @@ long int lastBatteryCheck = 0;
 void updateBatteryStatus(bool force = false)
 {
   // throttle
-  if (!force && lastBatteryCheck != 0 && millis() - lastBatteryCheck < 5000) {
+  if (!force && lastBatteryCheck != 0 && millis() - lastBatteryCheck < 5000)
+  {
     return;
   }
 
@@ -1105,22 +1120,32 @@ void updateBatteryStatus(bool force = false)
   const int batteryPercentage = getBatteryPercentage();
 
   String batteryPercentageText = "";
-  if (batteryPercentage == USB_POWER) {
+  if (batteryPercentage == USB_POWER)
+  {
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     batteryPercentageText = " USB";
-  } else {
-    if (batteryPercentage >= 60) {
+  }
+  else
+  {
+    if (batteryPercentage >= 60)
+    {
       tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    } else if (batteryPercentage >= 20) {
+    }
+    else if (batteryPercentage >= 20)
+    {
       tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    } else {
+    }
+    else
+    {
       tft.setTextColor(TFT_RED, TFT_BLACK);
     }
 
-    if (batteryPercentage != 100) {
+    if (batteryPercentage != 100)
+    {
       batteryPercentageText += " ";
 
-      if (batteryPercentage < 10) {
+      if (batteryPercentage < 10)
+      {
         batteryPercentageText += " ";
       }
     }
@@ -1265,11 +1290,11 @@ void menuLoop()
 
       if (key_val == "*")
       {
-        do {
+        do
+        {
           menuItemNo++;
           menuItemNo %= sizeof(menuItems) / sizeof(menuItems[0]);
-        }
-        while (menuItemCheck[menuItemNo] == 0);
+        } while (menuItemCheck[menuItemNo] == 0);
 
         btnloop = false;
       }
@@ -1354,7 +1379,7 @@ bool checkOfflineParams()
 bool getSats()
 {
   WiFiClientSecure client;
-  client.setInsecure();  //Some versions of WiFiClientSecure need this
+  client.setInsecure(); // Some versions of WiFiClientSecure need this
 
   lnbitsServer.toLowerCase();
   if (lnbitsServer.substring(0, 8) == "https://")
@@ -1402,7 +1427,7 @@ bool getSats()
 bool getInvoice()
 {
   WiFiClientSecure client;
-  client.setInsecure();  //Some versions of WiFiClientSecure need this
+  client.setInsecure(); // Some versions of WiFiClientSecure need this
 
   lnbitsServer.toLowerCase();
   if (lnbitsServer.substring(0, 8) == "https://")
@@ -1456,7 +1481,7 @@ bool getInvoice()
 bool checkInvoice()
 {
   WiFiClientSecure client;
-  client.setInsecure();  //Some versions of WiFiClientSecure need this
+  client.setInsecure(); // Some versions of WiFiClientSecure need this
 
   const char *lnbitsServerChar = lnbitsServer.c_str();
   const char *invoiceChar = invoice.c_str();
@@ -1500,7 +1525,7 @@ bool checkInvoice()
 String getValue(String data, char separator, int index)
 {
   int found = 0;
-  int strIndex[] = { 0, -1 };
+  int strIndex[] = {0, -1};
   const int maxIndex = data.length() - 1;
 
   for (int i = 0; i <= maxIndex && found <= index; i++)
@@ -1553,14 +1578,14 @@ bool makeLNURL()
 
   float total = amountToShow.toFloat() * multipler;
 
-  byte payload[51];  // 51 bytes is max one can get with xor-encryption
+  byte payload[51]; // 51 bytes is max one can get with xor-encryption
   if (selection == "Offline PoS")
   {
     size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLPoS + "?p=";
     preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   }
-  else  // ATM
+  else // ATM
   {
     size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLATM + "?atm=1&p=";
@@ -1593,7 +1618,7 @@ int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uin
   }
 
   int cur = 0;
-  output[cur] = 1;  // variant: XOR encryption
+  output[cur] = 1; // variant: XOR encryption
   cur++;
 
   // nonce_len | nonce
@@ -1606,9 +1631,9 @@ int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uin
   int payload_len = lenVarInt(pin) + 1 + lenVarInt(amount_in_cents);
   output[cur] = (uint8_t)payload_len;
   cur++;
-  uint8_t *payload = output + cur;                                  // pointer to the start of the payload
-  cur += writeVarInt(pin, output + cur, outlen - cur);              // pin code
-  cur += writeVarInt(amount_in_cents, output + cur, outlen - cur);  // amount
+  uint8_t *payload = output + cur;                                 // pointer to the start of the payload
+  cur += writeVarInt(pin, output + cur, outlen - cur);             // pin code
+  cur += writeVarInt(amount_in_cents, output + cur, outlen - cur); // amount
   cur++;
 
   // xor it with round key
@@ -1644,7 +1669,8 @@ unsigned int getBatteryPercentage()
   const float batteryCurVAboveMin = getInputVoltage() - batteryMinVoltage;
 
   const int batteryPercentage = (int)(batteryCurVAboveMin / batteryAllowedRange * 100);
-  if (batteryPercentage > 150) {
+  if (batteryPercentage > 150)
+  {
     return USB_POWER;
   }
 
@@ -1658,29 +1684,36 @@ float getInputVoltage()
   return ((float)v1 / 4095.0f) * 2.0f * 3.3f * (1100.0f / 1000.0f);
 }
 
-
 /**
  * Check whether the device should be put to sleep and put it to sleep
  * if it should
  */
-void maybeSleepDevice() {
-  if (isSleepEnabled && !isPretendSleeping) {
+void maybeSleepDevice()
+{
+  if (isSleepEnabled && !isPretendSleeping)
+  {
     long currentTime = millis();
 
-    if (currentTime > (timeOfLastInteraction + sleepTimer * 1000)) {
+    if (currentTime > (timeOfLastInteraction + sleepTimer * 1000))
+    {
       sleepAnimation();
       // The device wont charge if it is sleeping, so when charging, do a pretend sleep
-      if (isPoweredExternally()) {
+      if (isPoweredExternally())
+      {
         isLilyGoKeyboard();
         Serial.println("Pretend sleep now");
         isPretendSleeping = true;
         tft.fillScreen(TFT_BLACK);
       }
-      else {
-        if (isLilyGoKeyboard()) {
-          esp_sleep_enable_ext0_wakeup(GPIO_NUM_32, 1);  //1 = High, 0 = Low
-        } else {
-          //Configure Touchpad as wakeup source
+      else
+      {
+        if (isLilyGoKeyboard())
+        {
+          esp_sleep_enable_ext0_wakeup(GPIO_NUM_32, 1); // 1 = High, 0 = Low
+        }
+        else
+        {
+          // Configure Touchpad as wakeup source
           touchAttachInterrupt(T3, callback, 40);
           esp_sleep_enable_touchpad_wakeup();
         }
@@ -1719,21 +1752,22 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
 
   qrScreenBgColour = tft.color565(qrScreenBrightness, qrScreenBrightness, qrScreenBrightness);
 
-  switch (invoiceType) {
-    case LNPOS:
-      qrShowCodeln();
-      break;
-    case LNURLPOS:
-      qrShowCodeLNURL(" *MENU #SHOW PIN");
-      break;
-    case ONCHAIN:
-      qrShowCodeOnchain(true, " *MENU #CHECK");
-      break;
-    case LNURLATM:
-      qrShowCodeLNURL(" *MENU");
-      break;
-    default:
-      break;
+  switch (invoiceType)
+  {
+  case LNPOS:
+    qrShowCodeln();
+    break;
+  case LNURLPOS:
+    qrShowCodeLNURL(" *MENU #SHOW PIN");
+    break;
+  case ONCHAIN:
+    qrShowCodeOnchain(true, " *MENU #CHECK");
+    break;
+  case LNURLATM:
+    qrShowCodeLNURL(" *MENU");
+    break;
+  default:
+    break;
   }
 
   File configFile = SPIFFS.open("/config.txt", "w");
@@ -1744,7 +1778,8 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
 /**
  * Load stored config values
  */
-void loadConfig() {
+void loadConfig()
+{
   File file = SPIFFS.open("/config.txt");
   spiffing = file.readStringUntil('\n');
   String tempQrScreenBrightness = spiffing.c_str();
@@ -1752,7 +1787,8 @@ void loadConfig() {
   Serial.println("spiffcontent " + String(tempQrScreenBrightnessInt));
   file.close();
 
-  if (tempQrScreenBrightnessInt && tempQrScreenBrightnessInt > 3) {
+  if (tempQrScreenBrightnessInt && tempQrScreenBrightnessInt > 3)
+  {
     qrScreenBrightness = tempQrScreenBrightnessInt;
   }
   Serial.println("qrScreenBrightness from config " + String(qrScreenBrightness));
@@ -1762,14 +1798,17 @@ void loadConfig() {
 /**
  * Handle user inputs for adjusting the screen brightness
  */
-void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType) {
+void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType)
+{
   // Handle screen brighten on QR screen
-  if (keyVal == "1") {
+  if (keyVal == "1")
+  {
     Serial.println("Adjust bnrightness " + invoiceType);
     adjustQrBrightness(true, invoiceType);
   }
   // Handle screen dim on QR screen
-  else if (keyVal == "4") {
+  else if (keyVal == "4")
+  {
     Serial.println("Adjust bnrightness " + invoiceType);
     adjustQrBrightness(false, invoiceType);
   }
@@ -1778,7 +1817,8 @@ void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType) {
 /*
  * Get the keypad type
  */
-boolean isLilyGoKeyboard() {
+boolean isLilyGoKeyboard()
+{
   if (colPins[0] == 33)
   {
     return true;
@@ -1789,7 +1829,8 @@ boolean isLilyGoKeyboard() {
 /**
  * Does the device have external or internal power?
  */
-bool isPoweredExternally() {
+bool isPoweredExternally()
+{
   Serial.println("Is powered externally?");
   float inputVoltage = getInputVoltage();
   if (inputVoltage > 4.5)
@@ -1805,7 +1846,8 @@ bool isPoweredExternally() {
 /**
  * Awww. Show the go to sleep animation
  */
-void sleepAnimation() {
+void sleepAnimation()
+{
   printSleepAnimationFrame("(o.o)", 500);
   printSleepAnimationFrame("(-.-)", 500);
   printSleepAnimationFrame("(-.-)z", 250);
@@ -1814,7 +1856,8 @@ void sleepAnimation() {
   tft.fillScreen(TFT_BLACK);
 }
 
-void wakeAnimation() {
+void wakeAnimation()
+{
   printSleepAnimationFrame("(-.-)", 100);
   printSleepAnimationFrame("(o.o)", 200);
   tft.fillScreen(TFT_BLACK);
@@ -1823,12 +1866,13 @@ void wakeAnimation() {
 /**
    Print the line of the animation
 */
-void printSleepAnimationFrame(String text, int wait) {
+void printSleepAnimationFrame(String text, int wait)
+{
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(5, 80);
   tft.setTextSize(4);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  //tft.setFreeFont(BIGFONT);
+  // tft.setFreeFont(BIGFONT);
   tft.println(text);
   delay(wait);
 }
