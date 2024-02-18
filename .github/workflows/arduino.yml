@@ -22,12 +22,9 @@ jobs:
           sketch-paths: |
             - lnpos
           libraries: |
-            - name: WebSockets
             - name: ArduinoJson
-            - name: AutoConnect
             - name: Base64
             - name: Keypad
-            - name: PageBuilder
             - name: uBitcoin
             - source-path: ./libraries/TFT_eSPI
             - source-path: ./libraries/QRCode
