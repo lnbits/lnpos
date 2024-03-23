@@ -6,7 +6,7 @@ Check out this [video tutorial](https://twitter.com/arcbtc/status/15856050233371
 <a href="https://twitter.com/arcbtc/status/1484942260013838336">original demo</a>.
 
 <img src="https://github.com/arbadacarbaYK/lnpos/assets/63317640/17a8ff28-a938-4ab6-96e6-92cdc9163556" alt="switch_front" width="200">
-<img src="https://github.com/arbadacarbaYK/lnpos/assets/63317640/0fe4369b-3301-4812-bd83-077b060a883e" alt="switch_front" width="200">
+<img src="https://github.com/arbadacarbaYK/lnpos/assets/63317640/caa931d8-5696-4051-aed8-112977952812" alt="switch_front" width="200">
 
 # Flash and configure via webinstaller https://lnpos.lnbits.com/
 
