@@ -7,7 +7,7 @@ git clone https://github.com/lnbits/hardware-installer
 
 cp INSTALLER.md ./hardware-installer/public/INSTALLER.md
 cp versions.json ./hardware-installer/src/versions.json
-cp installer/config.js ./hardware-installer/src/config.js
+cp config.js ./hardware-installer/src/config.js
 
 sed -i "s/%title%/$PROJECT_NAME/g" ./hardware-installer/index.html
 
