@@ -1,9 +1,6 @@
-#include <WiFi.h>
-#include <WebServer.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <math.h>
-using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
 #include <Keypad.h>
@@ -14,7 +11,6 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <stdio.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
-#include <WiFiClientSecure.h>
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
@@ -35,14 +31,10 @@ bool hardcoded = false; /// Set to true to hardcode
 String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
 String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
 String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
-String lnbitsServer = "https://legend.lnbits.com";
-String invoice = "37d45d3e1f0d4572a905bad544588d7d";
 String lncurrency = "GBP";
 String lnurlATMMS = "https://mempool.space";
 String lnurlATMPin = "878787";
 String decimalplaces = "2";
-String ssid = "AlansBits";
-String password = "ithurtswhenip";
 
 //////////////////////////////////////////////////
 
@@ -73,10 +65,10 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+const char menuItems[5][13] = {"Offline PoS", "OnChain", "Offline ATM", "Settings"};
 const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
-int menuItemCheck[5] = {0, 0, 0, 0, 1};
+int menuItemCheck[5] = {0, 0, 0, 1};
 int menuItemNo = 0;
 int randomPin;
 int calNum = 1;
@@ -88,7 +80,6 @@ long timeOfLastInteraction = millis();
 bool isSleepEnabled = true;
 bool isPretendSleeping = false;
 bool onchainCheck = false;
-bool lnCheck = false;
 bool lnurlCheck = false;
 bool unConfirmed = true;
 bool selected = false;
@@ -97,7 +88,6 @@ bool lnurlCheckATM = false;
 double amountToShowNumber;
 enum InvoiceType
 {
-  LNPOS,
   LNURLPOS,
   ONCHAIN,
   LNURLATM,
@@ -178,33 +168,6 @@ void setup()
   checkHardcoded();
   readFiles();
 
-  // connect to configured WiFi
-  int wifiCounter = 0;
-  if (menuItemCheck[0])
-  {
-    delay(1000);
-    processing("Connecting to wifi");
-    WiFi.mode(WIFI_STA); // Optional
-    WiFi.begin(ssid, password);
-
-    while (WiFi.status() != WL_CONNECTED && wifiCounter < 30)
-    {
-      Serial.print(".");
-      delay(100);
-      wifiCounter++;
-    }
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      processing("Connected to wifi");
-      delay(3000);
-    }
-    else
-    {
-      error("Error", "WiFi failed", "");
-      delay(3000);
-    }
-  }
-
   delay(2000);
 }
 
@@ -216,16 +179,6 @@ void loop()
   amountToShow = decimalplacesOutput;
   unConfirmed = true;
   key_val = "";
-
-  // check wifi status
-  if (menuItemCheck[0] == 1 && WiFi.status() != WL_CONNECTED)
-  {
-    menuItemCheck[0] = -1;
-  }
-  else if (menuItemCheck[0] == -1 && WiFi.status() == WL_CONNECTED)
-  {
-    menuItemCheck[0] = 1;
-  }
 
   // count menu items
   int menuItemsAmount = 0;
@@ -249,11 +202,6 @@ void loop()
     if (menuItemsAmount > 1)
     {
       menuLoop();
-    }
-
-    if (selection == "LNPoS")
-    {
-      lnMain();
     }
     else if (selection == "OnChain")
     {
@@ -294,14 +242,10 @@ void checkHardcoded()
     lnurlPoS = "";
     lnurlATM = "";
     masterKey = "";
-    lnbitsServer = "";
-    invoice = "";
     lncurrency = "";
     lnurlATMMS = "";
     lnurlATMPin = "";
     decimalplaces = "";
-    ssid = "";
-    password = "";
   }
 }
 
@@ -435,128 +379,6 @@ void onchainMain()
         }
         handleBrightnessAdjust(key_val, ONCHAIN);
       }
-    }
-  }
-}
-
-void lnMain()
-{
-  readFiles();
-
-  if (!checkOnlineParams())
-  {
-    return;
-  }
-
-  if (lncurrency == "" || lncurrency == "default")
-  {
-    currencyLoop();
-  }
-
-  processing("FETCHING FIAT RATE");
-  if (!getSats())
-  {
-    error("FETCHING FIAT RATE FAILED");
-    delay(3000);
-    return;
-  }
-
-  isLNMoneyNumber(true);
-
-  while (unConfirmed)
-  {
-    key_val = "";
-    getKeypad(false, false, true, false);
-
-    if (key_val == "*")
-    {
-      unConfirmed = false;
-    }
-    else if (key_val == "#")
-    {
-      if (noSats.toInt() == 0)
-      {
-        error("ZERO SATS");
-        delay(3000);
-        isLNMoneyNumber(true);
-        continue;
-      }
-
-      // request invoice
-      processing("FETCHING INVOICE");
-      if (!getInvoice())
-      {
-        unConfirmed = false;
-        error("ERROR FETCHING INVOICE");
-        delay(3000);
-        break;
-      }
-
-      // show QR
-      qrShowCodeln();
-
-      // check invoice
-      bool isFirstRun = true;
-      while (unConfirmed)
-      {
-        int timer = 0;
-
-        if (!isFirstRun)
-        {
-          unConfirmed = checkInvoice();
-          if (!unConfirmed)
-          {
-            paymentSuccess();
-            timer = 5000;
-
-            while (key_val != "*")
-            {
-              key_val = "";
-              getKeypad(false, true, false, false);
-
-              if (key_val != "*")
-              {
-                delay(100);
-              }
-            }
-          }
-        }
-
-        // abort on * press
-        while (timer < (isFirstRun ? 6000 : 2000))
-        {
-          getKeypad(false, true, false, false);
-
-          if (key_val == "*")
-          {
-            noSats = "0";
-            dataIn = "0";
-            formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
-            amountToShow = decimalplacesOutput;
-            unConfirmed = false;
-            timer = 5000;
-            break;
-          }
-          else
-          {
-            delay(100);
-            handleBrightnessAdjust(key_val, LNPOS);
-            key_val = "";
-          }
-          timer = timer + 100;
-        }
-
-        isFirstRun = false;
-      }
-
-      noSats = "0";
-      dataIn = "0";
-      formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
-      amountToShow = decimalplacesOutput;
-    }
-    else
-    {
-      delay(100);
     }
   }
 }
@@ -722,11 +544,6 @@ void getKeypad(bool isATMPin, bool justKey, bool isLN, bool isATMNum)
   {
     dataIn += key_val;
   }
-
-  if (isLN)
-  {
-    isLNMoneyNumber(false);
-  }
   else if (isATMPin)
   {
     isATMMoneyPin(false);
@@ -767,45 +584,6 @@ void configLaunch(String title)
   tft.setCursor(30, 83);
   tft.setTextSize(2);
   // tft.println(config.apid);
-}
-
-void isLNMoneyNumber(bool cleared)
-{
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextSize(2);
-  tft.setCursor(0, 20);
-  tft.print("  - ENTER AMOUNT -");
-  tft.setTextSize(3);
-  tft.setCursor(0, 50);
-  tft.println(String(lncurrency) + ": ");
-  tft.println("SAT: ");
-  tft.setCursor(0, 120);
-  tft.setTextSize(2);
-  tft.println(" *MENU #INVOICE");
-
-  if (!cleared)
-  {
-    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
-    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
-    amountToShow = String(decimalplacesOutput);
-    noSats = String(converted * amountToShowNumber);
-  }
-  else
-  {
-    noSats = "0";
-    dataIn = "0";
-    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
-    amountToShow = decimalplacesOutput;
-  }
-
-  tft.setTextSize(3);
-  tft.setTextColor(TFT_RED, TFT_BLACK);
-  tft.setCursor(75, 50);
-  tft.println(amountToShow);
-  tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.setCursor(75, 75);
-  tft.println(noSats.toInt());
 }
 
 void isLNURLMoneyNumber(bool cleared)
@@ -922,38 +700,6 @@ void inputScreenOnChain()
   tft.println(" *MENU #ADDRESS");
 }
 
-void qrShowCodeln()
-{
-  tft.fillScreen(qrScreenBgColour);
-
-  qrData.toUpperCase();
-  const char *qrDataChar = qrData.c_str();
-  QRCode qrcoded;
-  uint8_t qrcodeData[qrcode_getBufferSize(20)];
-
-  qrcode_initText(&qrcoded, qrcodeData, 11, 0, qrDataChar);
-
-  for (uint8_t y = 0; y < qrcoded.size; y++)
-  {
-    for (uint8_t x = 0; x < qrcoded.size; x++)
-    {
-      if (qrcode_getModule(&qrcoded, x, y))
-      {
-        tft.fillRect(65 + 2 * x, 5 + 2 * y, 2, 2, TFT_BLACK);
-      }
-      else
-      {
-        tft.fillRect(65 + 2 * x, 5 + 2 * y, 2, 2, qrScreenBgColour);
-      }
-    }
-  }
-
-  tft.setCursor(0, 220);
-  tft.setTextSize(2);
-  tft.setTextColor(TFT_BLACK, TFT_WHITE);
-  tft.print(" *MENU");
-}
-
 void qrShowCodeOnchain(bool anAddress, String message)
 {
   tft.fillScreen(qrScreenBgColour);
@@ -1068,18 +814,6 @@ void processing(String message)
   tft.setTextSize(2);
   tft.setCursor(20, 60);
   tft.println(message);
-}
-
-void paymentSuccess()
-{
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.setTextSize(3);
-  tft.setCursor(70, 50);
-  tft.println("PAID");
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextSize(2);
-  tft.println("  PRESS * FOR MENU");
 }
 
 void showPin()
@@ -1332,42 +1066,6 @@ void menuLoop()
   }
 }
 
-bool checkOnlineParams()
-{
-  if (invoice != "" && invoice.length() != 32)
-  {
-    error("WRONG INVOICE");
-    delay(3000);
-    return false;
-  }
-
-  const char *decimal = decimalplaces.c_str();
-  if (!isInteger(decimal))
-  {
-    error("WRONG DECIMAL");
-    delay(3000);
-    return false;
-  }
-
-  lnbitsServer.toLowerCase();
-
-  if (lnbitsServer != "")
-  {
-    const char *lnServer = lnbitsServer.c_str();
-    char lastChar = lnServer[strlen(lnServer) - 1];
-
-    if (lastChar == '/')
-    {
-      error("WRONG LNBITS");
-      delay(3000);
-
-      return false;
-    }
-  }
-
-  return true;
-}
-
 bool checkOfflineParams()
 {
   if (baseURLPoS != "" && baseURLPoS.substring(0, 4) != "http")
@@ -1394,153 +1092,7 @@ bool checkOfflineParams()
   return true;
 }
 
-//////////LIGHTNING//////////////////////
-
-bool getSats()
-{
-  WiFiClientSecure client;
-  client.setInsecure(); // Some versions of WiFiClientSecure need this
-
-  lnbitsServer.toLowerCase();
-  if (lnbitsServer.substring(0, 8) == "https://")
-  {
-    lnbitsServer = lnbitsServer.substring(8, lnbitsServer.length());
-  }
-  const char *lnbitsServerChar = lnbitsServer.c_str();
-  const char *invoiceChar = invoice.c_str();
-  const char *lncurrencyChar = lncurrency.c_str();
-
-  Serial.println("connecting to LNbits server " + lnbitsServer);
-  if (!client.connect(lnbitsServerChar, 443))
-  {
-    Serial.println("failed to connect to LNbits server " + lnbitsServer);
-    return false;
-  }
-
-  const String toPost = "{\"amount\" : 1, \"from\" :\"" + String(lncurrencyChar) + "\"}";
-  const String url = "/api/v1/conversion";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + String(invoiceChar) + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
-
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-    if (line == "\r")
-    {
-      break;
-    }
-  }
-
-  const String line = client.readString();
-  StaticJsonDocument<150> doc;
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
-  {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
-    return false;
-  }
-
-  converted = doc["sats"];
-  return true;
-}
-
-bool getInvoice()
-{
-  WiFiClientSecure client;
-  client.setInsecure(); // Some versions of WiFiClientSecure need this
-
-  lnbitsServer.toLowerCase();
-  if (lnbitsServer.substring(0, 8) == "https://")
-  {
-    lnbitsServer = lnbitsServer.substring(8, lnbitsServer.length());
-  }
-  const char *lnbitsServerChar = lnbitsServer.c_str();
-  const char *invoiceChar = invoice.c_str();
-
-  if (!client.connect(lnbitsServerChar, 443))
-  {
-    Serial.println("failed");
-    error("SERVER DOWN");
-    delay(3000);
-    return false;
-  }
-
-  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
-  const String url = "/api/v1/payments";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
-
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-
-    if (line == "\r")
-    {
-      break;
-    }
-  }
-  const String line = client.readString();
-
-  StaticJsonDocument<1000> doc;
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
-  {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
-    return false;
-  }
-
-  const char *payment_hash = doc["checking_id"];
-  const char *payment_request = doc["payment_request"];
-  qrData = payment_request;
-  dataId = payment_hash;
-
-  Serial.println(qrData);
-  return true;
-}
-
-bool checkInvoice()
-{
-  WiFiClientSecure client;
-  client.setInsecure(); // Some versions of WiFiClientSecure need this
-
-  const char *lnbitsServerChar = lnbitsServer.c_str();
-  const char *invoiceChar = invoice.c_str();
-  if (!client.connect(lnbitsServerChar, 443))
-  {
-    error("SERVER DOWN");
-    delay(3000);
-    return false;
-  }
-
-  const String url = "/api/v1/payments/";
-  client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n\r\n");
-  while (client.connected())
-  {
-    const String line = client.readStringUntil('\n');
-    if (line == "\r")
-    {
-      break;
-    }
-  }
-
-  const String line = client.readString();
-  Serial.println(line);
-  StaticJsonDocument<2000> doc;
-
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
-  {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
-    return false;
-  }
-  if (doc["paid"])
-  {
-    unConfirmed = false;
-  }
-
-  return unConfirmed;
-}
+//////////UTILS///////////////
 
 String getValue(String data, char separator, int index)
 {
@@ -1561,7 +1113,6 @@ String getValue(String data, char separator, int index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-//////////UTILS///////////////
 void to_upper(char *arr)
 {
   for (size_t i = 0; i < strlen(arr); i++)
@@ -1774,9 +1325,6 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
 
   switch (invoiceType)
   {
-  case LNPOS:
-    qrShowCodeln();
-    break;
   case LNURLPOS:
     qrShowCodeLNURL(" *MENU #SHOW PIN");
     break;

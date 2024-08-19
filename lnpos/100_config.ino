@@ -128,14 +128,10 @@ void readFiles()
       lnurlPoS = getJsonValue(doc, "config_lnurlpos");
       lnurlATM = getJsonValue(doc, "config_lnurlatm");
       masterKey = getJsonValue(doc, "config_masterkey");
-      lnbitsServer = getJsonValue(doc, "config_server");
-      invoice = getJsonValue(doc, "config_invoice");
       lncurrency = getJsonValue(doc, "config_lncurrency");
       lnurlATMMS = getJsonValue(doc, "config_lnurlatmms");
       lnurlATMPin = getJsonValue(doc, "config_lnurlatmpin");
       decimalplaces = getJsonValue(doc, "config_decimalplaces");
-      ssid = getJsonValue(doc, "config_wifi_ssid");
-      password = getJsonValue(doc, "config_wifi_password");
     }
 
     ////////LNURL PoS string/////////
@@ -191,34 +187,6 @@ void readFiles()
       Serial.println("MasterKey not set");
     }
 
-    //////////Lnbits Server/////////
-    if (lnbitsServer != "null" || lnbitsServer != "")
-    {
-      Serial.println("");
-      Serial.println("lnbitsServer used from memory");
-      Serial.println("lnbitsServer: " + lnbitsServer);
-    }
-    else
-    {
-      Serial.println("lnbitsServer not set");
-    }
-
-    /////////LNbits Server///////
-    if (invoice != "null" || invoice != "")
-    {
-      Serial.println("");
-      Serial.println("invoice key used from memory");
-      Serial.println("invoice key: " + invoice);
-      if (invoice != "")
-      {
-        menuItemCheck[0] = 1;
-      }
-    }
-    else
-    {
-      Serial.println("invoice key not set");
-    }
-
     /////////PoS Currency///////
     if (lncurrency != "null" || lncurrency != "")
     {
@@ -266,30 +234,6 @@ void readFiles()
     else
     {
       Serial.println("no. fiat decimal places not set");
-    }
-
-    /////////WiFi SSID///////
-    if (ssid != "null" || ssid != "")
-    {
-      Serial.println("");
-      Serial.println("WiFi SSID used from memory");
-      Serial.println("WiFi SSID: " + ssid);
-    }
-    else
-    {
-      Serial.println("WiFi SSID not set");
-    }
-
-    /////////WiFi password///////
-    if (decimalplaces != "null" || decimalplaces != "")
-    {
-      Serial.println("");
-      Serial.println("WiFi password used from memory");
-      Serial.println("WiFi password: " + password);
-    }
-    else
-    {
-      Serial.println("WiFi password not set");
     }
   }
   paramFile.close();
