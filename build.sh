@@ -4,11 +4,11 @@ arduino-cli config --additional-urls https://raw.githubusercontent.com/espressif
 arduino-cli core update-index
 arduino-cli upgrade
 # uBitcoin is broken on esp32 3.x.x
-arduino-cli core install esp32:esp32@2.0.17
+arduino-cli core install esp32:esp32@2.0.1 
 arduino-cli lib install ArduinoJson Base64 Keypad uBitcoin
 arduino-cli compile \
     --build-property "build.partitions=min_spiffs" \
     --build-property "upload.maximum_size=1966080" \
     --library ./libraries/TFT_eSPI \
     --library ./libraries/QRCode \
-    --build-path build --fqbn esp32:esp32:ttgo-lora32 lnpos
+    --build-path build --fqbn esp32:esp32:ttgo-lora32-oled-v1 lnpos
