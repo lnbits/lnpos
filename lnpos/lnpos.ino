@@ -4,15 +4,17 @@
 #include <math.h>
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
-#include <Keypad.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include <Hash.h>
-#include <ArduinoJson.h>
 #include <stdio.h>
 #include "qrcoded.h"
-#include "Bitcoin.h"
 #include <WiFiClientSecure.h>
+
+// ArduinoJson, Keypad and uBitcoin should be installed using the Arduino Library manager:
+#include <Hash.h>
+#include <Bitcoin.h>
+#include <Keypad.h>
+#include <ArduinoJson.h>
 
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
