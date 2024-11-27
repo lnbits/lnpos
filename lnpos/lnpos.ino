@@ -1142,7 +1142,7 @@ void updateBatteryStatus(bool force = false)
   String batteryPercentageText = "";
   if (batteryPercentage == USB_POWER)
   {
-    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextColor(TFT_BLUE, TFT_BLACK);
     batteryPercentageText = " USB";
   }
   else
