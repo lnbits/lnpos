@@ -16,6 +16,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <Keypad.h>
 #include <ArduinoJson.h>
 
+#define VERSION "0.1.4"
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
@@ -1121,6 +1122,7 @@ void logo()
   tft.print("PoS");
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextSize(2);
+  tft.print(VERSION);
   tft.setCursor(0, 80);
   tft.print("Powered by LNbits");
 }
