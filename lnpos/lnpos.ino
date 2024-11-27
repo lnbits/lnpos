@@ -10,7 +10,8 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include "qrcoded.h"
 #include <WiFiClientSecure.h>
 
-// ArduinoJson, Keypad and uBitcoin should be installed using the Arduino Library manager:
+// ArduinoJson, Keypad and uBitcoin should be installed using the Arduino Library Manager.
+// The latest versions should work, verified with ArduinoJson 7.2.1, Keypad 3.1.1 and uBitcoin 0.2.0
 #include <Hash.h>
 #include <Bitcoin.h>
 #include <Keypad.h>
