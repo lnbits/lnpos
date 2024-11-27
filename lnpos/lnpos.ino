@@ -1,9 +1,7 @@
 #include <WiFi.h>
-#include <WebServer.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <math.h>
-using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
 #include <Keypad.h>
