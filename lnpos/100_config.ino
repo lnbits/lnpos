@@ -164,7 +164,7 @@ void readFiles()
       secretATM = getValue(lnurlATM, ',', 1);
       currencyATM = getValue(lnurlATM, ',', 2);
       Serial.println("");
-      Serial.println("lnurlPoS: " + lnurlPoS);
+      Serial.println("lnurlATM: " + lnurlATM);
       if (secretATM != "")
       {
         menuItemCheck[3] = 1;
