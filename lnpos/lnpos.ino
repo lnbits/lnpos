@@ -1289,13 +1289,14 @@ void menuLoop()
         {
           tft.setTextColor(TFT_GREEN, TFT_BLACK);
           selection = menuItems[i];
+          tft.print("-> ");
         }
         else
         {
           tft.setTextColor(TFT_WHITE, TFT_BLACK);
+          tft.print("   ");
         }
 
-        tft.print("  ");
         tft.println(menuItems[i]);
         menuItemCount++;
       }
