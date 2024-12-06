@@ -28,6 +28,8 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define MENU_ITEM_SEND_OFFLINE "ATM"
 #define MENU_ITEM_SETTINGS "Settings"
 
+#define ASTERIX_MENU "*MENU"
+
 #define DRAWING_EYES_OPEN "(o.o)"
 #define DRAWING_EYES_CLOSED "(-.-)"
 
@@ -417,7 +419,7 @@ void onchainMain()
     {
       HDPublicKey hd(masterKey);
       qrData = hd.derive(String("m/0/") + addressNo).address();
-      qrShowCodeOnchain(true, " *MENU #CHECK");
+      qrShowCodeOnchain(true, " " ASTERIX_MENU " #CHECK");
 
       while (unConfirmed)
       {
@@ -433,7 +435,7 @@ void onchainMain()
           while (unConfirmed)
           {
             qrData = "https://" + lnurlATMMS + "/address/" + qrData;
-            qrShowCodeOnchain(false, " *MENU");
+            qrShowCodeOnchain(false, " " ASTERIX_MENU);
 
             while (unConfirmed)
             {
@@ -604,7 +606,7 @@ void lnurlPoSMain()
         isLNURLMoneyNumber(true);
         continue;
       }
-      qrShowCodeLNURL(" *MENU #SHOW PIN");
+      qrShowCodeLNURL(" " ASTERIX_MENU " #SHOW PIN");
 
       while (unConfirmed)
       {
@@ -691,7 +693,7 @@ void lnurlATMMain()
             isATMMoneyNumber(true);
             continue;
           }
-          qrShowCodeLNURL(" *MENU");
+          qrShowCodeLNURL(" " ASTERIX_MENU);
 
           while (unConfirmed)
           {
@@ -796,7 +798,7 @@ void isLNMoneyNumber(bool cleared)
   tft.println("SAT: ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #INVOICE");
+  tft.println(" " ASTERIX_MENU " #INVOICE");
 
   if (!cleared)
   {
@@ -834,7 +836,7 @@ void isLNURLMoneyNumber(bool cleared)
   tft.println(String(currencyPoS) + ": ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #INVOICE");
+  tft.println(" " ASTERIX_MENU " #INVOICE");
   tft.setTextSize(3);
 
   if (!cleared)
@@ -867,7 +869,7 @@ void isATMMoneyNumber(bool cleared)
   tft.println(String(currencyATM) + ": ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #WITHDRAW");
+  tft.println(" " ASTERIX_MENU " #WITHDRAW");
   tft.setTextSize(3);
 
   if (!cleared)
@@ -900,7 +902,7 @@ void isATMMoneyPin(bool cleared)
   tft.println("PIN:");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #CLEAR");
+  tft.println(" " ASTERIX_MENU " #CLEAR");
 
   pinToShow = dataIn;
   String obscuredPinToShow = "";
@@ -933,7 +935,7 @@ void inputScreenOnChain()
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextSize(2);
   tft.setCursor(0, 120);
-  tft.println(" *MENU #ADDRESS");
+  tft.println(" " ASTERIX_MENU " #ADDRESS");
 }
 
 void qrShowCodeln()
@@ -965,7 +967,7 @@ void qrShowCodeln()
   tft.setCursor(0, 220);
   tft.setTextSize(2);
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
-  tft.print(" *MENU");
+  tft.print(" " ASTERIX_MENU);
 }
 
 void qrShowCodeOnchain(bool anAddress, String message)
@@ -1794,13 +1796,13 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
     qrShowCodeln();
     break;
   case LNURLPOS:
-    qrShowCodeLNURL(" *MENU #SHOW PIN");
+    qrShowCodeLNURL(" " ASTERIX_MENU " #SHOW PIN");
     break;
   case ONCHAIN:
-    qrShowCodeOnchain(true, " *MENU #CHECK");
+    qrShowCodeOnchain(true, " " ASTERIX_MENU " #CHECK");
     break;
   case LNURLATM:
-    qrShowCodeLNURL(" *MENU");
+    qrShowCodeLNURL(" " ASTERIX_MENU);
     break;
   default:
     break;
