@@ -22,6 +22,8 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
 
+// Strings that are used more than once are centralized here to avoid copy-paste,
+// because they often cause bugs/inconsistencies due to changing one, but not the other(s).
 #define MENU_ITEM_RECEIVE_ONLINE "LNPoS"
 #define MENU_ITEM_RECEIVE_OFFLINE "Offline PoS"
 #define MENU_ITEM_RECEIVE_ONCHAIN "OnChain"
@@ -38,9 +40,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FETCHING_FIAT_RATE "FETCHING FIAT RATE"
 #define FETCHING_INVOICE "FETCHING INVOICE"
 
-//////////SET TO TRUE TO WIPE MEMORY//////////////
-
-bool format = false;
+bool format = false; // Set to true to wipe memory
 
 ////////////////////////////////////////////////////////
 ////////////LNPOS WILL LOOK FOR DETAILS SET/////////////
@@ -48,7 +48,7 @@ bool format = false;
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
 
-bool hardcoded = false; /// Set to true to hardcode
+bool hardcoded = false; // Set to true to hardcode
 
 String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
 String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
