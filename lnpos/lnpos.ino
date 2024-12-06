@@ -22,6 +22,18 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
 
+#define MENU_ITEM_RECEIVE_ONLINE "LNPoS"
+#define MENU_ITEM_RECEIVE_OFFLINE "Offline PoS"
+#define MENU_ITEM_RECEIVE_ONCHAIN "OnChain"
+#define MENU_ITEM_SEND_OFFLINE "ATM"
+#define MENU_ITEM_SETTINGS "Settings"
+
+#define DRAWING_EYES_OPEN "(o.o)"
+#define DRAWING_EYES_CLOSED "(-.-)"
+
+#define FETCHING_FIAT_RATE "FETCHING FIAT RATE"
+#define FETCHING_INVOICE "FETCHING INVOICE"
+
 //////////SET TO TRUE TO WIPE MEMORY//////////////
 
 bool format = false;
@@ -75,7 +87,7 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+const char menuItems[5][13] = {MENU_ITEM_RECEIVE_ONLINE, MENU_ITEM_RECEIVE_OFFLINE, MENU_ITEM_RECEIVE_ONCHAIN, MENU_ITEM_SEND_OFFLINE, MENU_ITEM_SETTINGS};
 const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
@@ -253,23 +265,23 @@ void loop()
       menuLoop();
     }
 
-    if (selection == "LNPoS")
+    if (selection == MENU_ITEM_RECEIVE_ONLINE)
     {
       lnMain();
     }
-    else if (selection == "OnChain")
+    else if (selection == MENU_ITEM_RECEIVE_ONCHAIN)
     {
       onchainMain();
     }
-    else if (selection == "Offline PoS")
+    else if (selection == MENU_ITEM_RECEIVE_OFFLINE)
     {
       lnurlPoSMain();
     }
-    else if (selection == "ATM")
+    else if (selection == MENU_ITEM_SEND_OFFLINE)
     {
       lnurlATMMain();
     }
-    else if (selection == "Settings")
+    else if (selection == MENU_ITEM_SETTINGS)
     {
       accessPoint();
     }
@@ -455,10 +467,10 @@ void lnMain()
     currencyLoop();
   }
 
-  processing("FETCHING FIAT RATE");
+  processing(FETCHING_FIAT_RATE);
   if (!getSats())
   {
-    error("FETCHING FIAT RATE FAILED");
+    error(FETCHING_FIAT_RATE " FAILED");
     delay(3000);
     return;
   }
@@ -485,11 +497,11 @@ void lnMain()
       }
 
       // request invoice
-      processing("FETCHING INVOICE");
+      processing(FETCHING_INVOICE);
       if (!getInvoice())
       {
         unConfirmed = false;
-        error("ERROR FETCHING INVOICE");
+        error("ERROR " FETCHING_INVOICE);
         delay(3000);
         break;
       }
@@ -1603,7 +1615,7 @@ bool makeLNURL()
   float total = amountToShow.toFloat() * multipler;
 
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
-  if (selection == "Offline PoS")
+  if (selection == MENU_ITEM_RECEIVE_OFFLINE)
   {
     size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLPoS + "?p=";
@@ -1872,18 +1884,18 @@ bool isPoweredExternally()
  */
 void sleepAnimation()
 {
-  printSleepAnimationFrame("(o.o)", 500);
-  printSleepAnimationFrame("(-.-)", 500);
-  printSleepAnimationFrame("(-.-)z", 250);
-  printSleepAnimationFrame("(-.-)zz", 250);
-  printSleepAnimationFrame("(-.-)zzz", 250);
+  printSleepAnimationFrame(DRAWING_EYES_OPEN, 500);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED, 500);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "z", 250);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "zz", 250);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "zzz", 250);
   tft.fillScreen(TFT_BLACK);
 }
 
 void wakeAnimation()
 {
-  printSleepAnimationFrame("(-.-)", 100);
-  printSleepAnimationFrame("(o.o)", 200);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED, 100);
+  printSleepAnimationFrame(DRAWING_EYES_OPEN, 200);
   tft.fillScreen(TFT_BLACK);
 }
 
