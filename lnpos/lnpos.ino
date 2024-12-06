@@ -29,6 +29,8 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define MENU_ITEM_SETTINGS "Settings"
 
 #define ASTERIX_MENU "*MENU"
+#define HASH_CHECK "#CHECK"
+#define HASH_INVOICE "#INVOICE"
 
 #define DRAWING_EYES_OPEN "(o.o)"
 #define DRAWING_EYES_CLOSED "(-.-)"
@@ -419,7 +421,7 @@ void onchainMain()
     {
       HDPublicKey hd(masterKey);
       qrData = hd.derive(String("m/0/") + addressNo).address();
-      qrShowCodeOnchain(true, " " ASTERIX_MENU " #CHECK");
+      qrShowCodeOnchain(true, " " ASTERIX_MENU " " HASH_CHECK);
 
       while (unConfirmed)
       {
@@ -798,7 +800,7 @@ void isLNMoneyNumber(bool cleared)
   tft.println("SAT: ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" " ASTERIX_MENU " #INVOICE");
+  tft.println(" " ASTERIX_MENU " " HASH_INVOICE);
 
   if (!cleared)
   {
@@ -836,7 +838,7 @@ void isLNURLMoneyNumber(bool cleared)
   tft.println(String(currencyPoS) + ": ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" " ASTERIX_MENU " #INVOICE");
+  tft.println(" " ASTERIX_MENU " " HASH_INVOICE);
   tft.setTextSize(3);
 
   if (!cleared)
@@ -1799,7 +1801,7 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
     qrShowCodeLNURL(" " ASTERIX_MENU " #SHOW PIN");
     break;
   case ONCHAIN:
-    qrShowCodeOnchain(true, " " ASTERIX_MENU " #CHECK");
+    qrShowCodeOnchain(true, " " ASTERIX_MENU " " HASH_CHECK);
     break;
   case LNURLATM:
     qrShowCodeLNURL(" " ASTERIX_MENU);
