@@ -1,21 +1,23 @@
 #include <WiFi.h>
-#include <WebServer.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include <math.h>
-using WebServerClass = WebServer;
 fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FORMAT_ON_FAIL true
-#include <Keypad.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include <Hash.h>
-#include <ArduinoJson.h>
 #include <stdio.h>
 #include "qrcoded.h"
-#include "Bitcoin.h"
 #include <WiFiClientSecure.h>
 
+// ArduinoJson, Keypad and uBitcoin should be installed using the Arduino Library Manager.
+// The latest versions should work, verified with ArduinoJson 7.2.1, Keypad 3.1.1 and uBitcoin 0.2.0
+#include <Hash.h>
+#include <Bitcoin.h>
+#include <Keypad.h>
+#include <ArduinoJson.h>
+
+#define VERSION "0.1.4"
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
@@ -1121,6 +1123,7 @@ void logo()
   tft.print("PoS");
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextSize(2);
+  tft.print(VERSION);
   tft.setCursor(0, 80);
   tft.print("Powered by LNbits");
 }
@@ -1142,7 +1145,7 @@ void updateBatteryStatus(bool force = false)
   String batteryPercentageText = "";
   if (batteryPercentage == USB_POWER)
   {
-    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextColor(TFT_BLUE, TFT_BLACK);
     batteryPercentageText = " USB";
   }
   else
@@ -1289,13 +1292,14 @@ void menuLoop()
         {
           tft.setTextColor(TFT_GREEN, TFT_BLACK);
           selection = menuItems[i];
+          tft.print("-> ");
         }
         else
         {
           tft.setTextColor(TFT_WHITE, TFT_BLACK);
+          tft.print("   ");
         }
 
-        tft.print("  ");
         tft.println(menuItems[i]);
         menuItemCount++;
       }
