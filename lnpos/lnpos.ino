@@ -1839,13 +1839,13 @@ void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType)
   // Handle screen brighten on QR screen
   if (keyVal == "1")
   {
-    Serial.println("Adjust bnrightness " + invoiceType);
+    Serial.println("Adjust brightness " + invoiceType);
     adjustQrBrightness(true, invoiceType);
   }
   // Handle screen dim on QR screen
   else if (keyVal == "4")
   {
-    Serial.println("Adjust bnrightness " + invoiceType);
+    Serial.println("Adjust brightness " + invoiceType);
     adjustQrBrightness(false, invoiceType);
   }
 }
