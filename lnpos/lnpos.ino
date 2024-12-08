@@ -28,9 +28,9 @@ bool format = false;
 
 // Strings that are used more than once are centralized here to avoid copy-paste,
 // because they often cause bugs/inconsistencies due to changing one, but not the other(s).
-#define MENU_ITEM_RECEIVE_ONLINE "LNPoS"
-#define MENU_ITEM_RECEIVE_OFFLINE "Offline PoS"
-#define MENU_ITEM_RECEIVE_ONCHAIN "OnChain"
+#define MENU_ITEM_RECEIVE_ONLINE "Receive Online"
+#define MENU_ITEM_RECEIVE_OFFLINE "Receive Offline"
+#define MENU_ITEM_RECEIVE_ONCHAIN "Receive OnChain"
 #define MENU_ITEM_SEND_OFFLINE "ATM"
 #define MENU_ITEM_SETTINGS "Settings"
 
@@ -98,7 +98,7 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = {MENU_ITEM_RECEIVE_ONLINE, MENU_ITEM_RECEIVE_OFFLINE, MENU_ITEM_RECEIVE_ONCHAIN, MENU_ITEM_SEND_OFFLINE, MENU_ITEM_SETTINGS};
+const char menuItems[5][16] = {MENU_ITEM_RECEIVE_ONLINE, MENU_ITEM_RECEIVE_OFFLINE, MENU_ITEM_RECEIVE_ONCHAIN, MENU_ITEM_SEND_OFFLINE, MENU_ITEM_SETTINGS};
 const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
