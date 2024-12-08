@@ -1441,7 +1441,7 @@ bool getSats()
     return false;
   }
 
-  const String toPost = "{\"amount\" : 1, \"from\" :\"" + String(lncurrencyChar) + "\"}";
+  const String toPost = "{\"amount\" : 1, \"from_\" :\"" + String(lncurrencyChar) + "\", \"to\": \"sats\"}";
   const String url = "/api/v1/conversion";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + String(invoiceChar) + " \r\n" HTTP_CONTENT_TYPE "\r\n" HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
@@ -1455,6 +1455,7 @@ bool getSats()
   }
 
   const String line = client.readString();
+  Serial.println("POST of " + toPost + " to /api/v1/conversion returned: " + line);
   StaticJsonDocument<150> doc;
   DeserializationError error = deserializeJson(doc, line);
   if (error)
