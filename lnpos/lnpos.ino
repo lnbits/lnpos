@@ -48,15 +48,14 @@ bool format = false;
 #define HTTP_CONTENT_TYPE "Content-Type: application/json"
 #define HTTP_CONNECTION_CLOSE "Connection: close"
 
-bool format = false; // Set to true to wipe memory
-
 ////////////////////////////////////////////////////////
 ////////////LNPOS WILL LOOK FOR DETAILS SET/////////////
 ////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
 
-bool hardcoded = false; // Set to true to hardcode
+
+bool hardcoded = false; /// Set to true to hardcode
 
 String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
 String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
