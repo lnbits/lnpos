@@ -1274,6 +1274,7 @@ void currencyLoop()
 void menuLoop()
 {
   // footer/header
+  // FIXME: after a "pretend sleep", this 'header' isn't drawn
   tft.fillScreen(TFT_BLACK);
   tft.setTextSize(2);
   tft.setCursor(0, 10);
