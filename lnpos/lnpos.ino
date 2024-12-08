@@ -22,6 +22,10 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
 
+//////////SET TO TRUE TO WIPE MEMORY//////////////
+
+bool format = false;
+
 // Strings that are used more than once are centralized here to avoid copy-paste,
 // because they often cause bugs/inconsistencies due to changing one, but not the other(s).
 #define MENU_ITEM_RECEIVE_ONLINE "LNPoS"
