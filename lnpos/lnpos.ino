@@ -40,6 +40,10 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define FETCHING_FIAT_RATE "FETCHING FIAT RATE"
 #define FETCHING_INVOICE "FETCHING INVOICE"
 
+#define HTTP_USER_AGENT "User-Agent: ESP32"
+#define HTTP_CONTENT_TYPE "Content-Type: application/json"
+#define HTTP_CONNECTION_CLOSE "Connection: close"
+
 bool format = false; // Set to true to wipe memory
 
 ////////////////////////////////////////////////////////
@@ -1439,7 +1443,7 @@ bool getSats()
 
   const String toPost = "{\"amount\" : 1, \"from\" :\"" + String(lncurrencyChar) + "\"}";
   const String url = "/api/v1/conversion";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + String(invoiceChar) + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + String(invoiceChar) + " \r\n" HTTP_CONTENT_TYPE "\r\n" HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
   while (client.connected())
   {
@@ -1487,7 +1491,7 @@ bool getInvoice()
 
   const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + invoiceChar + " \r\n" HTTP_CONTENT_TYPE "\r\n" + HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
   while (client.connected())
   {
@@ -1533,7 +1537,7 @@ bool checkInvoice()
   }
 
   const String url = "/api/v1/payments/";
-  client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n\r\n");
+  client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" HTTP_USER_AGENT "\r\n" + HTTP_CONTENT_TYPE "\r\n" + HTTP_CONNECTION_CLOSE "\r\n\r\n");
   while (client.connected())
   {
     const String line = client.readStringUntil('\n');
