@@ -1432,7 +1432,6 @@ bool getSats()
   }
   const char *lnbitsServerChar = lnbitsServer.c_str();
   const char *invoiceChar = invoice.c_str();
-  const char *lncurrencyChar = lncurrency.c_str();
 
   Serial.println("connecting to LNbits server " + lnbitsServer);
   if (!client.connect(lnbitsServerChar, 443))
@@ -1441,7 +1440,7 @@ bool getSats()
     return false;
   }
 
-  const String toPost = "{\"amount\" : 1, \"from_\" :\"" + String(lncurrencyChar) + "\", \"to\": \"sats\"}";
+  const String toPost = "{\"amount\" : 1, \"from_\" :\"" + lncurrency + "\", \"to\": \"sats\"}";
   const String url = "/api/v1/conversion";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + String(invoiceChar) + " \r\n" HTTP_CONTENT_TYPE "\r\n" HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
