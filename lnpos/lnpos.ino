@@ -1298,7 +1298,7 @@ void menuLoop()
       menuItemNo++;
     }
 
-    tft.setCursor(0, 40);
+    tft.setCursor(0, 30);
     tft.setTextSize(2);
 
     int current = 0;
