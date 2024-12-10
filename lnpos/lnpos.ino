@@ -31,7 +31,7 @@ bool format = false;
 #define MENU_ITEM_RECEIVE_ONLINE "Receive Online"
 #define MENU_ITEM_RECEIVE_OFFLINE "Receive Offline"
 #define MENU_ITEM_RECEIVE_ONCHAIN "Receive OnChain"
-#define MENU_ITEM_SEND_OFFLINE "ATM"
+#define MENU_ITEM_SEND_OFFLINE "Send Offline"
 #define MENU_ITEM_SETTINGS "Settings"
 
 #define ASTERIX_MENU "*MENU"
