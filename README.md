@@ -4,11 +4,8 @@
 
 Check out this [video tutorial](https://twitter.com/arcbtc/status/1585605023337168896) on the Makerbits channel or the
 <a href="https://twitter.com/arcbtc/status/1484942260013838336">original demo</a>.
-
-<img src="https://github.com/arbadacarbaYK/lnpos/assets/63317640/6c73f327-6806-4f81-a9e1-651526a8d427" alt="switch_front" width="200">
-<img src="https://github.com/arbadacarbaYK/lnpos/assets/63317640/4a7fd0bd-34ed-45f7-853e-f69aeb24bd6b" alt="switch_front" width="200">
-
-# Flash and configure via webinstaller https://lnpos.lnbits.com/
+## Free and open-source bitcoin point-of-sale
+## Easy setup using browser https://lnpos.lnbits.com
 
 ### LNPoS includes
 

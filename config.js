@@ -75,7 +75,7 @@ export const elements = [
   },
   {
     name: "config_decimalplaces",
-    value: "",
+    value: 2,
     label: "FIAT Decimal Places",
     type: "text",
   },
