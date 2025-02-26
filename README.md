@@ -1,6 +1,6 @@
 <img src="images/tdisplay.png?raw=true">
 
-# Sally, the DIY Point of Sale device
+# LNPoS, the DIY Point of Sale device
 
 Check out this [video tutorial](https://twitter.com/arcbtc/status/1585605023337168896) on the Makerbits channel or the
 <a href="https://twitter.com/arcbtc/status/1484942260013838336">original demo</a>.
