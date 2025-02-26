@@ -19,7 +19,7 @@ Check out this [video tutorial](https://twitter.com/arcbtc/status/15856050233371
 
 ### What you need:
 - Lilygo <a href="https://www.aliexpress.com/item/33048962331.html">TTGO/Tdisplay</a> 
-- The <a href="https://www.aliexpress.com/item/1005003589706292.html">Lilygo Keyboard</a> specifically made for Sally 
+- The <a href="https://www.aliexpress.com/item/1005003589706292.html">Lilygo Keyboard</a> specifically made for LNPoS 
 => or get yourself the <a href="https://www.aliexpress.com/item/1005003589706292.html">LNPoS Kit</a>, dimensions 40x52x11mm e.g. in the [LNbits shop](https://shop.lnbits.com/product-category/hardware/point-of-sale-devices)
 - 3.7V lithium iron flat battery with 1.25mm JST with < 1000 mAh to fit inside the standard LNPoS Kit
 - LNbits LNURLdevice extension
