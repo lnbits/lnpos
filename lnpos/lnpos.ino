@@ -931,9 +931,9 @@ void qrShowCodeln()
   qrData.toUpperCase();
   const char *qrDataChar = qrData.c_str();
   QRCode qrcoded;
-  uint8_t qrcodeData[qrcode_getBufferSize(32)];
+  uint8_t qrcodeData[qrcode_getBufferSize(20)];
 
-  qrcode_initText(&qrcoded, qrcodeData, 32, 0, qrDataChar);
+  qrcode_initText(&qrcoded, qrcodeData, 11, 0, qrDataChar);
 
   for (uint8_t y = 0; y < qrcoded.size; y++)
   {
@@ -1585,7 +1585,7 @@ bool makeLNURL()
 {
   if (amountToShow.toFloat() <= 0)
   {
-    error("ZERO AMOUNT");
+    error("ZERO VALUE");
     delay(3000);
     return false;
   }
@@ -1597,8 +1597,6 @@ bool makeLNURL()
   }
 
   float total = amountToShow.toFloat() * multipler;
-
-  //const char* key = "Yq3t6w9z$C&F)J@M";
 
   unsigned char iv_init[16];
   unsigned char iv[16];
