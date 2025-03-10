@@ -163,6 +163,8 @@ void setup()
 {
   Serial.begin(115200);
 
+  Serial.println("Starting...");
+
   // load screen
   tft.init();
   tft.setRotation(1);
@@ -1609,12 +1611,12 @@ bool makeLNURL()
   if (selection == "Offline PoS")
   {
     randomPin = String(random(1000, 9999));
-    preparedURL = baseURLATM;
+    preparedURL = baseURLPoS;
   }
   else // ATM
   {
     randomPin = String("FFFF");
-    preparedURL = baseURLATM + "/atm/";
+    preparedURL = baseURLATM;
   }
   preparedURL += "?p=";
 
