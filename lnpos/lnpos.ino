@@ -9,6 +9,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <stdio.h>
 #include "qrcoded.h"
 #include <WiFiClientSecure.h>
+#include "mbedtls/aes.h"
 
 // ArduinoJson, Keypad and uBitcoin should be installed using the Arduino Library Manager.
 // The latest versions should work, verified with ArduinoJson 7.2.1, Keypad 3.1.1 and uBitcoin 0.2.0
@@ -23,7 +24,6 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
 
 //////////SET TO TRUE TO WIPE MEMORY//////////////
-
 bool format = false;
 
 ////////////////////////////////////////////////////////
@@ -34,8 +34,8 @@ bool format = false;
 
 bool hardcoded = false; /// Set to true to hardcode
 
-String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
-String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+String lnurlPoS = "https://legend.lnbits.com/lnpos/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
+String lnurlATM = "https://legend.lnbits.com/fossa/api/v1/lnurl/atm/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
 String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
 String lnbitsServer = "https://legend.lnbits.com";
 String invoice = "37d45d3e1f0d4572a905bad544588d7d";
@@ -63,6 +63,7 @@ String baseURLPoS;
 String secretPoS;
 String currencyPoS;
 String baseURLATM;
+String baseUrlAtmPage;
 String secretATM;
 String currencyATM;
 String dataIn = "0";
@@ -162,6 +163,8 @@ void formatNumber(float number, int decimalplaces, char *output)
 void setup()
 {
   Serial.begin(115200);
+
+  Serial.println("Starting...");
 
   // load screen
   tft.init();
@@ -1011,8 +1014,12 @@ void qrShowCodeLNURL(String message)
   qrData.toUpperCase();
   const char *qrDataChar = qrData.c_str();
   QRCode qrcoded;
-  uint8_t qrcodeData[qrcode_getBufferSize(20)];
-  qrcode_initText(&qrcoded, qrcodeData, 6, 0, qrDataChar);
+  uint8_t qrcodeData[qrcode_getBufferSize(11)];
+  qrcode_initText(&qrcoded, qrcodeData, 11, 0, qrDataChar);
+
+  unsigned int pixSize = 2;
+  unsigned int offsetTop = 3;
+  unsigned int offsetLeft = 65;
 
   for (uint8_t y = 0; y < qrcoded.size; y++)
   {
@@ -1020,11 +1027,11 @@ void qrShowCodeLNURL(String message)
     {
       if (qrcode_getModule(&qrcoded, x, y))
       {
-        tft.fillRect(65 + 3 * x, 5 + 3 * y, 3, 3, TFT_BLACK);
+        tft.fillRect(offsetLeft + pixSize * x, offsetTop + pixSize * y, pixSize, pixSize, TFT_BLACK);
       }
       else
       {
-        tft.fillRect(65 + 3 * x, 5 + 3 * y, 3, 3, qrScreenBgColour);
+        tft.fillRect(offsetLeft + pixSize * x, offsetTop + pixSize * y, pixSize, pixSize, qrScreenBgColour);
       }
     }
   }
@@ -1579,22 +1586,14 @@ void to_upper(char *arr)
 
 bool makeLNURL()
 {
-  if (amountToShow.toFloat() == 0)
+  if (amountToShow.toFloat() <= 0)
   {
     error("ZERO VALUE");
     delay(3000);
     return false;
   }
 
-  randomPin = random(1000, 9999);
-  byte nonce[8];
-  for (int i = 0; i < 8; i++)
-  {
-    nonce[i] = random(256);
-  }
-
   int multipler = pow(10, 2);
-
   if (currencyPoS == "sat")
   {
     multipler = 1;
@@ -1602,20 +1601,50 @@ bool makeLNURL()
 
   float total = amountToShow.toFloat() * multipler;
 
-  byte payload[51]; // 51 bytes is max one can get with xor-encryption
+  unsigned char iv_init[16];
+  unsigned char iv[16];
+
+  for (int i = 0; i < 16; i++) {
+      iv[i] = random(0, 255);
+      iv_init[i] = iv[i];
+  }
+  randomPin = String(random(1000, 9999));
+
   if (selection == "Offline PoS")
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, total);
-    preparedURL = baseURLPoS + "?p=";
-    preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
+    preparedURL = baseURLPoS;
   }
   else // ATM
   {
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, total);
-    preparedURL = baseURLATM + "?atm=1&p=";
-    preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
+    preparedURL = baseURLATM;
   }
+  preparedURL += "?p=";
 
+  String payload = randomPin + String(":") + String(total);
+  Serial.print("payload: ");
+  Serial.println(payload);
+  size_t payload_len = payload.length();
+  int padding = 16 - (payload_len % 16);
+  unsigned char encrypted[payload_len + padding] = {0};
+  String s = "";
+  encrypt(secretATM.c_str(), iv, payload_len + padding, payload.c_str(), encrypted);
+  for (int i = 0; i < sizeof(encrypted); i++) {
+      s = String(encrypted[i], HEX);
+      if (s.length() == 1) {
+          s = "0" + s;
+      }
+      preparedURL += s;
+  }
+  // append iv to the url
+  preparedURL += "&iv=";
+  for (int i = 0; i < sizeof(iv_init); i++) {
+      s = String(iv_init[i], HEX);
+      if (s.length() == 1) {
+          s = "0" + s;
+      }
+      preparedURL += s;
+  }
+  Serial.println();
   Serial.println(preparedURL);
   char Buf[200];
   preparedURL.toCharArray(Buf, 200);
@@ -1626,62 +1655,10 @@ bool makeLNURL()
   char *charLnurl = (char *)calloc(strlen(url) * 2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
-  qrData = charLnurl;
+  qrData = baseUrlAtmPage + charLnurl;
   Serial.println(qrData);
 
   return true;
-}
-
-int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uint8_t *nonce, size_t nonce_len, uint64_t pin, uint64_t amount_in_cents)
-{
-  // check we have space for all the data:
-  // <variant_byte><len|nonce><len|payload:{pin}{amount}><hmac>
-  if (outlen < 2 + nonce_len + 1 + lenVarInt(pin) + 1 + lenVarInt(amount_in_cents) + 8)
-  {
-    return 0;
-  }
-
-  int cur = 0;
-  output[cur] = 1; // variant: XOR encryption
-  cur++;
-
-  // nonce_len | nonce
-  output[cur] = nonce_len;
-  cur++;
-  memcpy(output + cur, nonce, nonce_len);
-  cur += nonce_len;
-
-  // payload, unxored first - <pin><currency byte><amount>
-  int payload_len = lenVarInt(pin) + 1 + lenVarInt(amount_in_cents);
-  output[cur] = (uint8_t)payload_len;
-  cur++;
-  uint8_t *payload = output + cur;                                 // pointer to the start of the payload
-  cur += writeVarInt(pin, output + cur, outlen - cur);             // pin code
-  cur += writeVarInt(amount_in_cents, output + cur, outlen - cur); // amount
-  cur++;
-
-  // xor it with round key
-  uint8_t hmacresult[32];
-  SHA256 h;
-  h.beginHMAC(key, keylen);
-  h.write((uint8_t *)"Round secret:", 13);
-  h.write(nonce, nonce_len);
-  h.endHMAC(hmacresult);
-  for (int i = 0; i < payload_len; i++)
-  {
-    payload[i] = payload[i] ^ hmacresult[i];
-  }
-
-  // add hmac to authenticate
-  h.beginHMAC(key, keylen);
-  h.write((uint8_t *)"Data:", 5);
-  h.write(output, cur);
-  h.endHMAC(hmacresult);
-  memcpy(output + cur, hmacresult, 8);
-  cur += 8;
-
-  // return number of bytes written to the output
-  return cur;
 }
 
 unsigned int getBatteryPercentage()
@@ -1899,4 +1876,17 @@ void printSleepAnimationFrame(String text, int wait)
   // tft.setFreeFont(BIGFONT);
   tft.println(text);
   delay(wait);
+}
+
+//////////ENCRYPTION///////////////
+void encrypt(const char* key, unsigned char* iv, int length, const char* plainText, unsigned char* outputBuffer){
+  if (strlen(key) != 16) {
+    Serial.println("Key must be 16 bytes long. not " + String(strlen(key)) + " bytes.");
+    return;
+  }
+  mbedtls_aes_context aes;
+  mbedtls_aes_init(&aes);
+  mbedtls_aes_setkey_enc(&aes, (const unsigned char*)key, strlen(key)*8);
+  mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, length, iv, (const unsigned char*)plainText, outputBuffer);
+  mbedtls_aes_free(&aes);
 }
