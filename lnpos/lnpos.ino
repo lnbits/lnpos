@@ -1880,6 +1880,10 @@ void printSleepAnimationFrame(String text, int wait)
 
 //////////ENCRYPTION///////////////
 void encrypt(const char* key, unsigned char* iv, int length, const char* plainText, unsigned char* outputBuffer){
+  if (strlen(key) != 16) {
+    Serial.println("Key must be 16 bytes long. not " + String(strlen(key)) + " bytes.");
+    return;
+  }
   mbedtls_aes_context aes;
   mbedtls_aes_init(&aes);
   mbedtls_aes_setkey_enc(&aes, (const unsigned char*)key, strlen(key)*8);
