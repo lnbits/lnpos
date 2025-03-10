@@ -34,8 +34,8 @@ bool format = false;
 
 bool hardcoded = false; /// Set to true to hardcode
 
-String lnurlPoS = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
-String lnurlATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+String lnurlPoS = "https://legend.lnbits.com/lnpos/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
+String lnurlATM = "https://legend.lnbits.com/fossa/api/v1/lnurl/atm/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
 String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
 String lnbitsServer = "https://legend.lnbits.com";
 String invoice = "37d45d3e1f0d4572a905bad544588d7d";
@@ -63,6 +63,7 @@ String baseURLPoS;
 String secretPoS;
 String currencyPoS;
 String baseURLATM;
+String baseUrlAtmPage;
 String secretATM;
 String currencyATM;
 String dataIn = "0";
@@ -80,7 +81,7 @@ const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
 int menuItemNo = 0;
-String randomPin;
+int randomPin;
 int calNum = 1;
 int sumFlag = 0;
 int converted = 0;
@@ -1607,15 +1608,14 @@ bool makeLNURL()
       iv[i] = random(0, 255);
       iv_init[i] = iv[i];
   }
+  randomPin = String(random(1000, 9999));
 
   if (selection == "Offline PoS")
   {
-    randomPin = String(random(1000, 9999));
     preparedURL = baseURLPoS;
   }
   else // ATM
   {
-    randomPin = String("FFFF");
     preparedURL = baseURLATM;
   }
   preparedURL += "?p=";
@@ -1655,7 +1655,7 @@ bool makeLNURL()
   char *charLnurl = (char *)calloc(strlen(url) * 2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
-  qrData = charLnurl;
+  qrData = baseUrlAtmPage + charLnurl;
   Serial.println(qrData);
 
   return true;

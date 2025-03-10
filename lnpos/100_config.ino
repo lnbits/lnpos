@@ -160,10 +160,15 @@ void readFiles()
     if (lnurlATM != "null" || lnurlATM != "")
     {
       baseURLATM = getValue(lnurlATM, ',', 0);
+      // remove /api/v1.... and add /atm?lightning=
+      int apiPos = baseURLATM.indexOf("api");
+      baseUrlAtmPage = baseURLATM.substring(0, apiPos);
+      baseUrlAtmPage += "atm?lightning=";
       secretATM = getValue(lnurlATM, ',', 1);
       currencyATM = getValue(lnurlATM, ',', 2);
       Serial.println("");
-      Serial.println("lnurlATM: " + baseURLATM);
+      Serial.println("baseURLATM: " + baseURLATM);
+      Serial.println("baseUrlAtmPage: " + baseUrlAtmPage);
       if (secretATM != "")
       {
         menuItemCheck[3] = 1;
@@ -171,7 +176,7 @@ void readFiles()
     }
     else
     {
-      Serial.println("lnurlATM not set");
+      Serial.println("baseURLATM not set");
     }
 
     //////////MasterKey/////////
