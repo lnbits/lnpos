@@ -1011,7 +1011,6 @@ void qrShowCodeLNURL(String message)
 {
   tft.fillScreen(qrScreenBgColour);
 
-  qrData.toUpperCase();
   const char *qrDataChar = qrData.c_str();
   QRCode qrcoded;
   uint8_t qrcodeData[qrcode_getBufferSize(11)];
@@ -1608,26 +1607,29 @@ bool makeLNURL()
       iv[i] = random(0, 255);
       iv_init[i] = iv[i];
   }
-  randomPin = String(random(1000, 9999));
 
-  if (selection == "Offline PoS")
-  {
+  String secret;
+
+  if (selection == "Offline PoS") {
     preparedURL = baseURLPoS;
-  }
-  else // ATM
-  {
+    secret = secretPoS;
+  } else {
+    // ATM
     preparedURL = baseURLATM;
+    secret = secretATM;
   }
   preparedURL += "?p=";
 
-  String payload = randomPin + String(":") + String(total);
+  randomPin = random(1000, 9999);
+  String payload = String(randomPin) + String(":") + String(total);
   Serial.print("payload: ");
   Serial.println(payload);
   size_t payload_len = payload.length();
   int padding = 16 - (payload_len % 16);
   unsigned char encrypted[payload_len + padding] = {0};
   String s = "";
-  encrypt(secretATM.c_str(), iv, payload_len + padding, payload.c_str(), encrypted);
+  encrypt(secret.c_str(), iv, payload_len + padding, payload.c_str(), encrypted);
+
   for (int i = 0; i < sizeof(encrypted); i++) {
       s = String(encrypted[i], HEX);
       if (s.length() == 1) {
@@ -1655,7 +1657,12 @@ bool makeLNURL()
   char *charLnurl = (char *)calloc(strlen(url) * 2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
-  qrData = baseUrlAtmPage + charLnurl;
+  if (selection == "Offline PoS") {
+    qrData = charLnurl;
+  } else {
+    // ATM
+    qrData = baseUrlAtmPage + charLnurl;
+  }
   Serial.println(qrData);
 
   return true;
