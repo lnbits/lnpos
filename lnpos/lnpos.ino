@@ -1600,10 +1600,11 @@ bool makeLNURL()
 
   float total = amountToShow.toFloat() * multipler;
 
-  unsigned char iv_init[16];
-  unsigned char iv[16];
+  int iv_length = 16;
+  unsigned char iv_init[iv_length];
+  unsigned char iv[iv_length];
 
-  for (int i = 0; i < 16; i++) {
+  for (int i = 0; i < iv_length; i++) {
       iv[i] = random(0, 255);
       iv_init[i] = iv[i];
   }
@@ -1618,7 +1619,6 @@ bool makeLNURL()
     preparedURL = baseURLATM;
     secret = secretATM;
   }
-  preparedURL += "?p=";
 
   randomPin = random(1000, 9999);
   String payload = String(randomPin) + String(":") + String(total);
@@ -1626,28 +1626,16 @@ bool makeLNURL()
   Serial.println(payload);
   size_t payload_len = payload.length();
   int padding = 16 - (payload_len % 16);
-  unsigned char encrypted[payload_len + padding] = {0};
-  String s = "";
-  encrypt(secret.c_str(), iv, payload_len + padding, payload.c_str(), encrypted);
+  payload_len += padding;
+  unsigned char encrypted[payload_len] = {0};
+  encrypt(secret.c_str(), iv, payload_len, payload.c_str(), encrypted);
 
-  for (int i = 0; i < sizeof(encrypted); i++) {
-      s = String(encrypted[i], HEX);
-      if (s.length() == 1) {
-          s = "0" + s;
-      }
-      preparedURL += s;
-  }
-  // append iv to the url
+  preparedURL += "?p=";
+  preparedURL += toBase64(encrypted, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
   preparedURL += "&iv=";
-  for (int i = 0; i < sizeof(iv_init); i++) {
-      s = String(iv_init[i], HEX);
-      if (s.length() == 1) {
-          s = "0" + s;
-      }
-      preparedURL += s;
-  }
-  Serial.println();
+  preparedURL += toBase64(iv_init, iv_length, BASE64_URLSAFE | BASE64_NOPADDING);
   Serial.println(preparedURL);
+
   char Buf[200];
   preparedURL.toCharArray(Buf, 200);
   char *url = Buf;
