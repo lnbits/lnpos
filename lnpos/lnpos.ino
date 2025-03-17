@@ -1013,11 +1013,11 @@ void qrShowCodeLNURL(String message)
 
   const char *qrDataChar = qrData.c_str();
   QRCode qrcoded;
-  uint8_t qrcodeData[qrcode_getBufferSize(11)];
-  qrcode_initText(&qrcoded, qrcodeData, 11, 0, qrDataChar);
+  uint8_t qrcodeData[qrcode_getBufferSize(20)];
+  qrcode_initText(&qrcoded, qrcodeData, 6, 0, qrDataChar);
 
-  unsigned int pixSize = 2;
-  unsigned int offsetTop = 3;
+  unsigned int pixSize = 3;
+  unsigned int offsetTop = 5;
   unsigned int offsetLeft = 65;
 
   for (uint8_t y = 0; y < qrcoded.size; y++)
@@ -1645,12 +1645,7 @@ bool makeLNURL()
   char *charLnurl = (char *)calloc(strlen(url) * 2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
-  if (selection == "Offline PoS") {
-    qrData = charLnurl;
-  } else {
-    // ATM
-    qrData = baseUrlAtmPage + charLnurl;
-  }
+  qrData = charLnurl;
   Serial.println(qrData);
 
   return true;
