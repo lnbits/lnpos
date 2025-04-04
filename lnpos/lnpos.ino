@@ -26,11 +26,34 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 
 bool format = false;
 
+// Strings that are used more than once are centralized here to avoid copy-paste,
+// because they often cause bugs/inconsistencies due to changing one, but not the other(s).
+#define MENU_ITEM_RECEIVE_ONLINE "Receive Online"
+#define MENU_ITEM_RECEIVE_OFFLINE "Receive Offline"
+#define MENU_ITEM_RECEIVE_ONCHAIN "Receive OnChain"
+#define MENU_ITEM_SEND_OFFLINE "Send Offline"
+#define MENU_ITEM_SETTINGS "Settings"
+
+#define ASTERIX_MENU "*MENU"
+#define HASH_CHECK "#CHECK"
+#define HASH_INVOICE "#INVOICE"
+
+#define DRAWING_EYES_OPEN "(o.o)"
+#define DRAWING_EYES_CLOSED "(-.-)"
+
+#define FETCHING_FIAT_RATE "FETCHING FIAT RATE"
+#define FETCHING_INVOICE "FETCHING INVOICE"
+
+#define HTTP_USER_AGENT "User-Agent: ESP32"
+#define HTTP_CONTENT_TYPE "Content-Type: application/json"
+#define HTTP_CONNECTION_CLOSE "Connection: close"
+
 ////////////////////////////////////////////////////////
 ////////////LNPOS WILL LOOK FOR DETAILS SET/////////////
 ////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
+
 
 bool hardcoded = false; /// Set to true to hardcode
 
@@ -75,7 +98,7 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+const char menuItems[5][16] = {MENU_ITEM_RECEIVE_ONLINE, MENU_ITEM_RECEIVE_OFFLINE, MENU_ITEM_RECEIVE_ONCHAIN, MENU_ITEM_SEND_OFFLINE, MENU_ITEM_SETTINGS};
 const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
@@ -253,23 +276,23 @@ void loop()
       menuLoop();
     }
 
-    if (selection == "LNPoS")
+    if (selection == MENU_ITEM_RECEIVE_ONLINE)
     {
       lnMain();
     }
-    else if (selection == "OnChain")
+    else if (selection == MENU_ITEM_RECEIVE_ONCHAIN)
     {
       onchainMain();
     }
-    else if (selection == "Offline PoS")
+    else if (selection == MENU_ITEM_RECEIVE_OFFLINE)
     {
       lnurlPoSMain();
     }
-    else if (selection == "ATM")
+    else if (selection == MENU_ITEM_SEND_OFFLINE)
     {
       lnurlATMMain();
     }
-    else if (selection == "Settings")
+    else if (selection == MENU_ITEM_SETTINGS)
     {
       accessPoint();
     }
@@ -405,7 +428,7 @@ void onchainMain()
     {
       HDPublicKey hd(masterKey);
       qrData = hd.derive(String("m/0/") + addressNo).address();
-      qrShowCodeOnchain(true, " *MENU #CHECK");
+      qrShowCodeOnchain(true, " " ASTERIX_MENU " " HASH_CHECK);
 
       while (unConfirmed)
       {
@@ -421,7 +444,7 @@ void onchainMain()
           while (unConfirmed)
           {
             qrData = "https://" + lnurlATMMS + "/address/" + qrData;
-            qrShowCodeOnchain(false, " *MENU");
+            qrShowCodeOnchain(false, " " ASTERIX_MENU);
 
             while (unConfirmed)
             {
@@ -455,10 +478,10 @@ void lnMain()
     currencyLoop();
   }
 
-  processing("FETCHING FIAT RATE");
+  processing(FETCHING_FIAT_RATE);
   if (!getSats())
   {
-    error("FETCHING FIAT RATE FAILED");
+    error(FETCHING_FIAT_RATE " FAILED");
     delay(3000);
     return;
   }
@@ -485,11 +508,11 @@ void lnMain()
       }
 
       // request invoice
-      processing("FETCHING INVOICE");
+      processing(FETCHING_INVOICE);
       if (!getInvoice())
       {
         unConfirmed = false;
-        error("ERROR FETCHING INVOICE");
+        error("ERROR " FETCHING_INVOICE);
         delay(3000);
         break;
       }
@@ -592,7 +615,7 @@ void lnurlPoSMain()
         isLNURLMoneyNumber(true);
         continue;
       }
-      qrShowCodeLNURL(" *MENU #SHOW PIN");
+      qrShowCodeLNURL(" " ASTERIX_MENU " #SHOW PIN");
 
       while (unConfirmed)
       {
@@ -679,7 +702,7 @@ void lnurlATMMain()
             isATMMoneyNumber(true);
             continue;
           }
-          qrShowCodeLNURL(" *MENU");
+          qrShowCodeLNURL(" " ASTERIX_MENU);
 
           while (unConfirmed)
           {
@@ -784,7 +807,7 @@ void isLNMoneyNumber(bool cleared)
   tft.println("SAT: ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #INVOICE");
+  tft.println(" " ASTERIX_MENU " " HASH_INVOICE);
 
   if (!cleared)
   {
@@ -822,7 +845,7 @@ void isLNURLMoneyNumber(bool cleared)
   tft.println(String(currencyPoS) + ": ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #INVOICE");
+  tft.println(" " ASTERIX_MENU " " HASH_INVOICE);
   tft.setTextSize(3);
 
   if (!cleared)
@@ -855,7 +878,7 @@ void isATMMoneyNumber(bool cleared)
   tft.println(String(currencyATM) + ": ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #WITHDRAW");
+  tft.println(" " ASTERIX_MENU " #WITHDRAW");
   tft.setTextSize(3);
 
   if (!cleared)
@@ -888,7 +911,7 @@ void isATMMoneyPin(bool cleared)
   tft.println("PIN:");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
-  tft.println(" *MENU #CLEAR");
+  tft.println(" " ASTERIX_MENU " #CLEAR");
 
   pinToShow = dataIn;
   String obscuredPinToShow = "";
@@ -921,7 +944,7 @@ void inputScreenOnChain()
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextSize(2);
   tft.setCursor(0, 120);
-  tft.println(" *MENU #ADDRESS");
+  tft.println(" " ASTERIX_MENU " #ADDRESS");
 }
 
 void qrShowCodeln()
@@ -953,7 +976,7 @@ void qrShowCodeln()
   tft.setCursor(0, 220);
   tft.setTextSize(2);
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
-  tft.print(" *MENU");
+  tft.print(" " ASTERIX_MENU);
 }
 
 void qrShowCodeOnchain(bool anAddress, String message)
@@ -1254,6 +1277,7 @@ void currencyLoop()
 void menuLoop()
 {
   // footer/header
+  // FIXME: after a "pretend sleep", this 'header' isn't drawn
   tft.fillScreen(TFT_BLACK);
   tft.setTextSize(2);
   tft.setCursor(0, 10);
@@ -1278,7 +1302,7 @@ void menuLoop()
       menuItemNo++;
     }
 
-    tft.setCursor(0, 40);
+    tft.setCursor(0, 30);
     tft.setTextSize(2);
 
     int current = 0;
@@ -1412,7 +1436,6 @@ bool getSats()
   }
   const char *lnbitsServerChar = lnbitsServer.c_str();
   const char *invoiceChar = invoice.c_str();
-  const char *lncurrencyChar = lncurrency.c_str();
 
   Serial.println("connecting to LNbits server " + lnbitsServer);
   if (!client.connect(lnbitsServerChar, 443))
@@ -1421,9 +1444,9 @@ bool getSats()
     return false;
   }
 
-  const String toPost = "{\"amount\" : 1, \"from\" :\"" + String(lncurrencyChar) + "\"}";
+  const String toPost = "{\"amount\" : 1, \"from_\" :\"" + lncurrency + "\", \"to\": \"sats\"}";
   const String url = "/api/v1/conversion";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + String(invoiceChar) + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + String(invoiceChar) + " \r\n" HTTP_CONTENT_TYPE "\r\n" HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
   while (client.connected())
   {
@@ -1435,6 +1458,7 @@ bool getSats()
   }
 
   const String line = client.readString();
+  Serial.println("POST of " + toPost + " to /api/v1/conversion returned: " + line);
   StaticJsonDocument<150> doc;
   DeserializationError error = deserializeJson(doc, line);
   if (error)
@@ -1471,7 +1495,7 @@ bool getInvoice()
 
   const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
+  client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" HTTP_USER_AGENT "\r\n" "X-Api-Key: " + invoiceChar + " \r\n" HTTP_CONTENT_TYPE "\r\n" + HTTP_CONNECTION_CLOSE "\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
   while (client.connected())
   {
@@ -1517,7 +1541,7 @@ bool checkInvoice()
   }
 
   const String url = "/api/v1/payments/";
-  client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n\r\n");
+  client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" HTTP_USER_AGENT "\r\n" + HTTP_CONTENT_TYPE "\r\n" + HTTP_CONNECTION_CLOSE "\r\n\r\n");
   while (client.connected())
   {
     const String line = client.readStringUntil('\n');
@@ -1603,7 +1627,7 @@ bool makeLNURL()
   float total = amountToShow.toFloat() * multipler;
 
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
-  if (selection == "Offline PoS")
+  if (selection == MENU_ITEM_RECEIVE_OFFLINE)
   {
     size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretPoS.c_str(), secretPoS.length(), nonce, sizeof(nonce), randomPin, total);
     preparedURL = baseURLPoS + "?p=";
@@ -1782,13 +1806,13 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
     qrShowCodeln();
     break;
   case LNURLPOS:
-    qrShowCodeLNURL(" *MENU #SHOW PIN");
+    qrShowCodeLNURL(" " ASTERIX_MENU " #SHOW PIN");
     break;
   case ONCHAIN:
-    qrShowCodeOnchain(true, " *MENU #CHECK");
+    qrShowCodeOnchain(true, " " ASTERIX_MENU " " HASH_CHECK);
     break;
   case LNURLATM:
-    qrShowCodeLNURL(" *MENU");
+    qrShowCodeLNURL(" " ASTERIX_MENU);
     break;
   default:
     break;
@@ -1827,13 +1851,13 @@ void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType)
   // Handle screen brighten on QR screen
   if (keyVal == "1")
   {
-    Serial.println("Adjust bnrightness " + invoiceType);
+    Serial.println("Adjust brightness " + invoiceType);
     adjustQrBrightness(true, invoiceType);
   }
   // Handle screen dim on QR screen
   else if (keyVal == "4")
   {
-    Serial.println("Adjust bnrightness " + invoiceType);
+    Serial.println("Adjust brightness " + invoiceType);
     adjustQrBrightness(false, invoiceType);
   }
 }
@@ -1872,18 +1896,18 @@ bool isPoweredExternally()
  */
 void sleepAnimation()
 {
-  printSleepAnimationFrame("(o.o)", 500);
-  printSleepAnimationFrame("(-.-)", 500);
-  printSleepAnimationFrame("(-.-)z", 250);
-  printSleepAnimationFrame("(-.-)zz", 250);
-  printSleepAnimationFrame("(-.-)zzz", 250);
+  printSleepAnimationFrame(DRAWING_EYES_OPEN, 500);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED, 500);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "z", 250);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "zz", 250);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED "zzz", 250);
   tft.fillScreen(TFT_BLACK);
 }
 
 void wakeAnimation()
 {
-  printSleepAnimationFrame("(-.-)", 100);
-  printSleepAnimationFrame("(o.o)", 200);
+  printSleepAnimationFrame(DRAWING_EYES_CLOSED, 100);
+  printSleepAnimationFrame(DRAWING_EYES_OPEN, 200);
   tft.fillScreen(TFT_BLACK);
 }
 
