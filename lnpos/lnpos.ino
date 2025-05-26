@@ -1616,6 +1616,10 @@ bool makeLNURL()
   int salt_length = 8;
   unsigned char salt[salt_length];
 
+  for (int i = 0; i < salt_length; i++) {
+    salt[i] = random(0, 256);
+  }
+
   unsigned char keyIV[32 + 16] = {0};
   deriveKeyAndIV(secret.c_str(), salt, keyIV);
 
