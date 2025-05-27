@@ -19,7 +19,7 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 #include <Keypad.h>
 #include <ArduinoJson.h>
 
-#define VERSION "0.1.4"
+#define VERSION "1.0.0"
 #define PARAM_FILE "/elements.json"
 #define KEY_FILE "/thekey.txt"
 #define USB_POWER 1000 // battery percentage sentinel value to indicate USB power
