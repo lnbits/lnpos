@@ -146,6 +146,9 @@ void readFiles()
       currencyPoS = getValue(lnurlPoS, ',', 2);
       Serial.println("");
       Serial.println("lnurlPoS: " + lnurlPoS);
+      Serial.println("baseURLPoS: " + baseURLPoS);
+      Serial.println("secretPoS: " + secretPoS);
+      Serial.println("currencyPoS: " + currencyPoS);
       if (secretPoS != "")
       {
         menuItemCheck[1] = 1;
@@ -159,6 +162,8 @@ void readFiles()
     ////////LNURL ATM string/////////
     if (lnurlATM != "null" || lnurlATM != "")
     {
+      Serial.println("");
+      Serial.println("lnurlATM: " + lnurlATM);
       baseURLATM = getValue(lnurlATM, ',', 0);
       // remove /api/v1.... and add /atm?lightning=
       int apiPos = baseURLATM.indexOf("api");
@@ -166,9 +171,10 @@ void readFiles()
       baseUrlAtmPage += "atm?lightning=";
       secretATM = getValue(lnurlATM, ',', 1);
       currencyATM = getValue(lnurlATM, ',', 2);
-      Serial.println("");
-      Serial.println("baseURLATM: " + baseURLATM);
       Serial.println("baseUrlAtmPage: " + baseUrlAtmPage);
+      Serial.println("baseURLATM: " + baseURLATM);
+      Serial.println("secretATM: " + secretATM);
+      Serial.println("currencyATM: " + currencyATM);
       if (secretATM != "")
       {
         menuItemCheck[3] = 1;
@@ -285,7 +291,7 @@ void readFiles()
     }
 
     /////////WiFi password///////
-    if (decimalplaces != "null" || decimalplaces != "")
+    if (password != "null" || password != "")
     {
       Serial.println("");
       Serial.println("WiFi password used from memory");
