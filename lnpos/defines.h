@@ -81,11 +81,11 @@ bool lnurlCheckATM = false;
 double amountToShowNumber;
 enum InvoiceType
 {
-  LNPOS,
-  offlinePoS,
-  ONCHAIN,
-  offlineATM,
-  PORTAL
+    LNPOS,
+    offlinePoS,
+    ONCHAIN,
+    offlineATM,
+    PORTAL
 };
 
 SHA256 h;
@@ -106,8 +106,8 @@ byte colPins[cols] = {33, 32, 25};     // connect to the column pinouts of the k
 
 struct KeyValue
 {
-  String key;
-  String value;
+    String key;
+    String value;
 };
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
