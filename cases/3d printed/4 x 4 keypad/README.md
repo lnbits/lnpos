@@ -1,6 +1,6 @@
 # 3D Printed Cases for LNPoS
 
-These 3D print files will print a case for the LNURLPoS device
+These 3D print files will print a case for the offlinePoS device
 
 There is space inside the case for a small battery, a switch and the TTGO display.
 

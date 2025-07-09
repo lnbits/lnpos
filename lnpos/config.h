@@ -1,3 +1,10 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include "defines.h"
+#include "helpers.h"
+#include "ui.h"
+
 void configOverSerialPort()
 {
   serialLaunch();
@@ -125,27 +132,27 @@ void readFiles()
         return;
       }
 
-      lnurlPoS = getJsonValue(doc, "config_lnurlpos");
-      lnurlATM = getJsonValue(doc, "config_lnurlatm");
+      offlinePoS = getJsonValue(doc, "config_offlinePoS");
+      offlineATM = getJsonValue(doc, "config_offlineATM");
       masterKey = getJsonValue(doc, "config_masterkey");
       lnbitsServer = getJsonValue(doc, "config_server");
       invoice = getJsonValue(doc, "config_invoice");
-      lncurrency = getJsonValue(doc, "config_lncurrency");
-      lnurlATMMS = getJsonValue(doc, "config_lnurlatmms");
-      lnurlATMPin = getJsonValue(doc, "config_lnurlatmpin");
-      decimalplaces = getJsonValue(doc, "config_decimalplaces");
+      lnCurrency = getJsonValue(doc, "config_lnCurrency");
+      mempool = getJsonValue(doc, "config_mempool");
+      securityPin = getJsonValue(doc, "config_securityPin");
+      fiatDecimalPlaces = getJsonValue(doc, "config_decimalplaces");
       ssid = getJsonValue(doc, "config_wifi_ssid");
       password = getJsonValue(doc, "config_wifi_password");
     }
 
     ////////LNURL PoS string/////////
-    if (lnurlPoS != "null" || lnurlPoS != "")
+    if (offlinePoS != "null" || offlinePoS != "")
     {
-      baseURLPoS = getValue(lnurlPoS, ',', 0);
-      secretPoS = getValue(lnurlPoS, ',', 1);
-      currencyPoS = getValue(lnurlPoS, ',', 2);
+      baseURLPoS = getValue(offlinePoS, ',', 0);
+      secretPoS = getValue(offlinePoS, ',', 1);
+      currencyPoS = getValue(offlinePoS, ',', 2);
       Serial.println("");
-      Serial.println("lnurlPoS: " + lnurlPoS);
+      Serial.println("offlinePoS: " + offlinePoS);
       Serial.println("baseURLPoS: " + baseURLPoS);
       Serial.println("secretPoS: " + secretPoS);
       Serial.println("currencyPoS: " + currencyPoS);
@@ -156,21 +163,21 @@ void readFiles()
     }
     else
     {
-      Serial.println("lnurlPoS not set");
+      Serial.println("offlinePoS not set");
     }
 
     ////////LNURL ATM string/////////
-    if (lnurlATM != "null" || lnurlATM != "")
+    if (offlineATM != "null" || offlineATM != "")
     {
       Serial.println("");
-      Serial.println("lnurlATM: " + lnurlATM);
-      baseURLATM = getValue(lnurlATM, ',', 0);
+      Serial.println("offlineATM: " + offlineATM);
+      baseURLATM = getValue(offlineATM, ',', 0);
       // remove /api/v1.... and add /atm?lightning=
       int apiPos = baseURLATM.indexOf("api");
       baseUrlAtmPage = baseURLATM.substring(0, apiPos);
       baseUrlAtmPage += "atm?lightning=";
-      secretATM = getValue(lnurlATM, ',', 1);
-      currencyATM = getValue(lnurlATM, ',', 2);
+      secretATM = getValue(offlineATM, ',', 1);
+      currencyATM = getValue(offlineATM, ',', 2);
       Serial.println("baseUrlAtmPage: " + baseUrlAtmPage);
       Serial.println("baseURLATM: " + baseURLATM);
       Serial.println("secretATM: " + secretATM);
@@ -230,11 +237,11 @@ void readFiles()
     }
 
     /////////PoS Currency///////
-    if (lncurrency != "null" || lncurrency != "")
+    if (lnCurrency != "null" || lnCurrency != "")
     {
       Serial.println("");
       Serial.println("PoS currency used from memory");
-      Serial.println("PoS currency: " + lncurrency);
+      Serial.println("PoS currency: " + lnCurrency);
     }
     else
     {
@@ -242,11 +249,11 @@ void readFiles()
     }
 
     /////////mempool.space server///////
-    if (lnurlATMMS != "null" || lnurlATMMS != "")
+    if (mempool != "null" || mempool != "")
     {
       Serial.println("");
       Serial.println("mempool.space server used from memory");
-      Serial.println("mempool.space server: " + lnurlATMMS);
+      Serial.println("mempool.space server: " + mempool);
     }
     else
     {
@@ -254,24 +261,24 @@ void readFiles()
     }
 
     /////////mATM/Settings pin///////
-    if (lnurlATMPin != "null" || lnurlATMPin != "")
+    if (securityPin != "null" || securityPin != "")
     {
       Serial.println("");
       Serial.println("ATM/settings security pin used from memory");
-      Serial.println("ATM/settings security pin: " + lnurlATMPin);
+      Serial.println("ATM/settings security pin: " + securityPin);
     }
     else
     {
-      lnurlATMPin = "878787";
+      securityPin = "878787";
       Serial.println("ATM/Settings security pin not set using default");
     }
 
     /////////no. FIAT decimal places///////
-    if (decimalplaces != "null" || decimalplaces != "")
+    if (fiatDecimalPlaces != "null" || fiatDecimalPlaces != "")
     {
       Serial.println("");
       Serial.println("no. fiat decimal places used from memory");
-      Serial.println("no. fiat decimal places: " + decimalplaces);
+      Serial.println("no. fiat decimal places: " + fiatDecimalPlaces);
     }
     else
     {
