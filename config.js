@@ -20,15 +20,15 @@ export const addressesAndFiles = [
 export const configPath = "elements.json";
 export const elements = [
   {
-    name: "config_lnurlpos",
+    name: "config_offlinePoS",
     value: "",
-    label: "LNURLPoS string from LNURLDevices extension",
+    label: "offlinePoS string from LNURLDevices extension",
     type: "text",
   },
   {
-    name: "config_lnurlatm",
+    name: "config_offlineATM",
     value: "",
-    label: "LNURL ATM",
+    label: "Offline ATM",
     type: "text",
   },
   {
@@ -56,21 +56,21 @@ export const elements = [
     type: "text",
   },
   {
-    name: "config_lncurrency",
+    name: "config_lnCurrency",
     value: "",
     label: "PoS Currency. ie: EUR",
     type: "text",
   },
   {
-    name: "config_lnurlatmms",
+    name: "config_mempool",
     value: "",
     label: "Mempool.space Server",
     type: "text",
   },
   {
-    name: "config_lnurlatmpin",
+    name: "config_securityPin",
     value: "",
-    label: "LNURLATM pin String",
+    label: "offlineATM pin String",
     type: "text",
   },
   {

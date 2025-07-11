@@ -1,4 +1,4 @@
-## Laser Cut CAses for LNURLPoS
+## Laser Cut CAses for offlinePoS
 
 There are 2 lightburn designs for cases depending on membrane keypads. Designs use layered 3mm acrylic and M4 nuts/bolts <br/>(Blue = fill/engrave 1.5mm depth, Black = cut)
 

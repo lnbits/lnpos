@@ -8,9 +8,9 @@ LNPoS
 LNPoS includes:
 
 - LNPoS (for online LN payments, original <a href="https://github.com/arcbtc/LNPoS">project</a>)
-- LNURLPoS (for offline LN payments, original <a href="https://github.com/arcbtc/LNURLPoS">project</a> )
+- offlinePoS (for offline LN payments, original <a href="https://github.com/arcbtc/offlinePoS">project</a> )
 - OnChain (for onchain payments)
-- LNURLATM (for making offline LN withdraw links).
+- offlineATM (for making offline LN withdraw links).
   <br></br>
 
 Original <a href="https://twitter.com/arcbtc/status/1484942260013838336">demo</a>
