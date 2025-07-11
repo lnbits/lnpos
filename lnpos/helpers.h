@@ -1,9 +1,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#include "defines.h"
-#include "ui.h"
-
 bool isInteger(const char *str)
 {
     if (*str == '-' || *str == '+')

@@ -1,10 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "defines.h"
-#include "helpers.h"
-#include "ui.h"
-
 void configOverSerialPort()
 {
   serialLaunch();
@@ -311,3 +307,5 @@ void readFiles()
   }
   paramFile.close();
 }
+
+#endif

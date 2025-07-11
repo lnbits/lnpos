@@ -1,10 +1,6 @@
 #ifndef SCREENS_H
 #define SCREENS_H
 
-#include "defines.h"
-#include "helpers.h"
-#include "ui.h"
-
 // on-chain payment method
 void onchainMain()
 {

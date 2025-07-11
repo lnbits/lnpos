@@ -1,8 +1,6 @@
 #ifndef UI_H
 #define UI_H
 
-#include "defines.h"
-
 void configLaunch(String title)
 {
     tft.fillScreen(TFT_BLACK);
