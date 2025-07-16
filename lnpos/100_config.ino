@@ -125,15 +125,15 @@ void readFiles()
         return;
       }
 
-      offlinePoS = getJsonValue(doc, "config_lnurlpos");
-      offlineATM = getJsonValue(doc, "config_lnurlatm");
+      offlinePoS = getJsonValue(doc, "config_offlinepos");
+      offlineATM = getJsonValue(doc, "config_offlineatm");
       masterKey = getJsonValue(doc, "config_masterkey");
       lnbitsServer = getJsonValue(doc, "config_server");
       invoice = getJsonValue(doc, "config_invoice");
       lnCurrency = getJsonValue(doc, "config_lncurrency");
-      mempool = getJsonValue(doc, "config_lnurlatmms");
-      securityPin = getJsonValue(doc, "config_lnurlatmpin");
-      decimalplaces = getJsonValue(doc, "config_decimalplaces");
+      mempool = getJsonValue(doc, "config_mempool");
+      securityPin = getJsonValue(doc, "config_securitypin");
+      decimalplaces = getJsonValue(doc, "config_fiatdecimalplaces");
       ssid = getJsonValue(doc, "config_wifi_ssid");
       password = getJsonValue(doc, "config_wifi_password");
     }

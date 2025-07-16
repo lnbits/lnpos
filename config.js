@@ -20,28 +20,44 @@ export const addressesAndFiles = [
 export const configPath = "elements.json";
 export const elements = [
   {
-    name: "config_lnurlpos",
+    type: "heading",
+    label: "Offline PoS",
+  },
+  {
+    name: "config_offlinepos",
     value: "",
-    label: "LNURLPoS string from LNURLDevices extension",
+    label: "LNURL string from the LNPoS extension",
     type: "text",
   },
   {
-    name: "config_lnurlatm",
+    type: "heading",
+    label: "Offline ATM",
+  },
+  {
+    name: "config_offlineatm",
     value: "",
-    label: "LNURL ATM",
+    label: "LNURL string from the FOSSA extension",
     type: "text",
   },
   {
-    name: "config_password",
-    value: "",
-    label: "Device Password",
-    type: "text",
+    type: "heading",
+    label: "Onchain addresses",
   },
   {
     name: "config_masterkey",
     value: "",
     label: "Onchain Master Public Key",
     type: "text",
+  },
+  {
+    name: "config_mempool",
+    value: "",
+    label: "Mempool.space Server, for creating a checking link",
+    type: "text",
+  },
+  {
+    type: "heading",
+    label: "Online PoS",
   },
   {
     name: "config_server",
@@ -62,24 +78,6 @@ export const elements = [
     type: "text",
   },
   {
-    name: "config_lnurlatmms",
-    value: "",
-    label: "Mempool.space Server",
-    type: "text",
-  },
-  {
-    name: "config_lnurlatmpin",
-    value: "",
-    label: "LNURLATM pin String",
-    type: "text",
-  },
-  {
-    name: "config_decimalplaces",
-    value: 2,
-    label: "FIAT Decimal Places",
-    type: "text",
-  },
-  {
     name: "config_wifi_ssid",
     value: "",
     label: "WiFi SSID",
@@ -89,6 +87,22 @@ export const elements = [
     name: "config_wifi_password",
     value: "",
     label: "WiFi Password",
+    type: "text",
+  },
+  {
+    type: "heading",
+    label: "Additional settings",
+  },
+  {
+    name: "config_securitypin",
+    value: "",
+    label: "LNURLATM pin String",
+    type: "text",
+  },
+  {
+    name: "config_fiatdecimalplaces",
+    value: 2,
+    label: "FIAT Decimal Places ie 2 for USD, 0 for YEN",
     type: "text",
   },
 ];
