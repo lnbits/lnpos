@@ -159,11 +159,11 @@ bool isInteger(const char *str)
   return true;
 }
 
-void formatNumber(float number, int decimalplaces, char *output)
+void formatNumber(float number, int fiatDecimalPlaces, char *output)
 {
-  // Create a format string based on the decimalplaces
+  // Create a format string based on the fiatDecimalPlaces
   char formatString[10];
-  sprintf(formatString, "%%.%df", decimalplaces);
+  sprintf(formatString, "%%.%df", fiatDecimalPlaces);
 
   // Use the format string to write the number to the output buffer
   sprintf(output, formatString, number);
@@ -226,7 +226,7 @@ void loop()
 {
   noSats = "0";
   dataIn = "0";
-  formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+  formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
   amountToShow = decimalplacesOutput;
   unConfirmed = true;
   key_val = "";
@@ -313,7 +313,7 @@ void checkHardcoded()
     lnCurrency = "";
     mempool = "";
     securityPin = "";
-    decimalplaces = "";
+    fiatDecimalPlaces = "";
     ssid = "";
     password = "";
   }
@@ -432,7 +432,7 @@ void onchainMain()
         {
           while (unConfirmed)
           {
-            qrData = "https://" + mempool + "/address/" + qrData;
+            qrData = mempool + "/address/" + qrData;
             qrShowCodeOnchain(false, " *MENU");
 
             while (unConfirmed)
@@ -545,7 +545,7 @@ void lnMain()
           {
             noSats = "0";
             dataIn = "0";
-            formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+            formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
             amountToShow = decimalplacesOutput;
             unConfirmed = false;
             timer = 5000;
@@ -565,7 +565,7 @@ void lnMain()
 
       noSats = "0";
       dataIn = "0";
-      formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+      formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
       amountToShow = decimalplacesOutput;
     }
     else
@@ -800,8 +800,8 @@ void isLNMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
-    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShowNumber = dataIn.toFloat() / pow(10, fiatDecimalPlaces.toInt());
+    formatNumber(amountToShowNumber, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = String(decimalplacesOutput);
     noSats = String(converted * amountToShowNumber);
   }
@@ -809,7 +809,7 @@ void isLNMoneyNumber(bool cleared)
   {
     noSats = "0";
     dataIn = "0";
-    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = decimalplacesOutput;
   }
 
@@ -839,14 +839,14 @@ void isLNURLMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
-    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShowNumber = dataIn.toFloat() / pow(10, fiatDecimalPlaces.toInt());
+    formatNumber(amountToShowNumber, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = String(decimalplacesOutput);
   }
   else
   {
     dataIn = "0";
-    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = decimalplacesOutput;
   }
 
@@ -872,14 +872,14 @@ void isATMMoneyNumber(bool cleared)
 
   if (!cleared)
   {
-    amountToShowNumber = dataIn.toFloat() / pow(10, decimalplaces.toInt());
-    formatNumber(amountToShowNumber, decimalplaces.toInt(), decimalplacesOutput);
+    amountToShowNumber = dataIn.toFloat() / pow(10, fiatDecimalPlaces.toInt());
+    formatNumber(amountToShowNumber, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = String(decimalplacesOutput);
   }
   else
   {
     dataIn = "0";
-    formatNumber(0, decimalplaces.toInt(), decimalplacesOutput);
+    formatNumber(0, fiatDecimalPlaces.toInt(), decimalplacesOutput);
     amountToShow = decimalplacesOutput;
   }
 
@@ -1360,7 +1360,7 @@ bool checkOnlineParams()
     return false;
   }
 
-  const char *decimal = decimalplaces.c_str();
+  const char *decimal = fiatDecimalPlaces.c_str();
   if (!isInteger(decimal))
   {
     error("WRONG DECIMAL");
@@ -1403,7 +1403,7 @@ bool checkOfflineParams()
     return false;
   }
 
-  if (!isInteger(decimalplaces.c_str()))
+  if (!isInteger(fiatDecimalPlaces.c_str()))
   {
     error("WRONG DECIMAL");
     delay(3000);

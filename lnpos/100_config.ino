@@ -133,7 +133,7 @@ void readFiles()
       lnCurrency = getJsonValue(doc, "config_lncurrency");
       mempool = getJsonValue(doc, "config_mempool");
       securityPin = getJsonValue(doc, "config_securitypin");
-      decimalplaces = getJsonValue(doc, "config_fiatdecimalplaces");
+      fiatDecimalPlaces = getJsonValue(doc, "config_fiatdecimalplaces");
       ssid = getJsonValue(doc, "config_wifi_ssid");
       password = getJsonValue(doc, "config_wifi_password");
     }
@@ -267,11 +267,11 @@ void readFiles()
     }
 
     /////////no. FIAT decimal places///////
-    if (decimalplaces != "null" || decimalplaces != "")
+    if (fiatDecimalPlaces != "null" || fiatDecimalPlaces != "")
     {
       Serial.println("");
       Serial.println("no. fiat decimal places used from memory");
-      Serial.println("no. fiat decimal places: " + decimalplaces);
+      Serial.println("no. fiat decimal places: " + fiatDecimalPlaces);
     }
     else
     {
