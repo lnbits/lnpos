@@ -4,7 +4,7 @@ REPO=https://github.com/lnbits/lnpos/releases/download
 INSTALLER_PATH=./hardware-installer/public/firmware
 
 git clone https://github.com/lnbits/hardware-installer
-
+git checkout headings
 cp INSTALLER.md ./hardware-installer/public/INSTALLER.md
 cp versions.json ./hardware-installer/src/versions.json
 cp config.js ./hardware-installer/src/config.js

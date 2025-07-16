@@ -2,3 +2,5 @@ tmp
 .vscode
 build
 .cache
+
+hardware-installer/
