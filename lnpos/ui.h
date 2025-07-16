@@ -287,11 +287,6 @@ void qrShowCodeLNURL(String message)
     tft.println(message);
 }
 
-void error(String message)
-{
-    error(message, "", "");
-}
-
 void error(String message, String additional, String additional2)
 {
     tft.fillScreen(TFT_BLACK);
@@ -314,6 +309,13 @@ void error(String message, String additional, String additional2)
         tft.println(additional2);
     }
 }
+
+
+void error(String message)
+{
+    error(message, "", "");
+}
+
 
 void processing(String message)
 {
@@ -537,6 +539,20 @@ void menuLoop()
 }
 
 /**
+   Print the line of the animation
+*/
+void printSleepAnimationFrame(String text, int wait)
+{
+    tft.fillScreen(TFT_BLACK);
+    tft.setCursor(5, 80);
+    tft.setTextSize(4);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    // tft.setFreeFont(BIGFONT);
+    tft.println(text);
+    delay(wait);
+}
+
+/**
  * Awww. Show the go to sleep animation
  */
 void sleepAnimation()
@@ -556,18 +572,6 @@ void wakeAnimation()
     tft.fillScreen(TFT_BLACK);
 }
 
-/**
-   Print the line of the animation
-*/
-void printSleepAnimationFrame(String text, int wait)
-{
-    tft.fillScreen(TFT_BLACK);
-    tft.setCursor(5, 80);
-    tft.setTextSize(4);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    // tft.setFreeFont(BIGFONT);
-    tft.println(text);
-    delay(wait);
-}
+
 
 #endif

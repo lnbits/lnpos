@@ -112,8 +112,8 @@ char maxdig[20];
 
 #include "settings.h"
 #include "config.h"
-#include "helpers.h"
 #include "ui.h"
+#include "helpers.h"
 #include "screens.h"
 
 void setup()
