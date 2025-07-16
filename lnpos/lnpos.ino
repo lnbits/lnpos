@@ -28,24 +28,32 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 bool format = false;
 
 ////////////////////////////////////////////////////////
-////////////LNPOS WILL LOOK FOR DETAILS SET/////////////
-////////OVER THE WEBINSTALLER CONFIG, HOWEVER///////////
 ///////////OPTIONALLY SET HARDCODED DETAILS/////////////
 ////////////////////////////////////////////////////////
 
+///////// OPTIONALLY SET HARDCODED SETTINGS ////////////
 bool hardcoded = false; /// Set to true to hardcode
 
-String lnurlPoS = "https://demo.lnbits.com/lnpos/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
-String lnurlATM = "https://demo.lnbits.com/fossa/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+/// FOR OFFLINE POS
+String offlinePoS = "https://demo.lnbits.com/lnpos/api/v1/lnurl/WTmei,BzzoY5wbgpym3eMdb9ueXr,USD";
+
+/// FOR OFFLINE ATM
+String offlineATM = "https://demo.lnbits.com/fossa/api/v1/lnurl/W5xu4,XGg4BJ3xCh36JdMKm2kgDw,USD";
+
+/// FOR GENERATING ONCHAIN ADDRESSES
 String masterKey = "xpub6CJFgwcim8tPBJo2A6dS13kZxqbgtWKD3LKj1tyurWADbXbPyWo11exyotTSUY3cvhQy5Mfj8FSURgpXhc4L2UvQyaTMC36S49JnNJMmcWU";
+String mempool = "https://mempool.space";
+
+/// FOR ONLINE POS
 String lnbitsServer = "https://demo.lnbits.com";
 String invoice = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-String lncurrency = "GBP";
-String lnurlATMMS = "https://mempool.space";
-String lnurlATMPin = "878787";
-String decimalplaces = "2";
+String lnCurrency = "GBP";
 String ssid = "AlansBits";
 String password = "ithurtswhenip";
+
+/// ADDITIONAL SETTINGS
+String securityPin = "878787";  // FOR SETTINGS AND ATM
+String fiatDecimalPlaces = "2"; // FOR OUR JAPANESE FREINDS
 
 //////////////////////////////////////////////////
 
@@ -297,14 +305,14 @@ void checkHardcoded()
 {
   if (!hardcoded)
   {
-    lnurlPoS = "";
-    lnurlATM = "";
+    offlinePoS = "";
+    offlineATM = "";
     masterKey = "";
     lnbitsServer = "";
     invoice = "";
-    lncurrency = "";
-    lnurlATMMS = "";
-    lnurlATMPin = "";
+    lnCurrency = "";
+    mempool = "";
+    securityPin = "";
     decimalplaces = "";
     ssid = "";
     password = "";
@@ -332,7 +340,7 @@ void accessPoint()
       isATMMoneyPin(true);
     }
 
-    if (pinToShow.length() == lnurlATMPin.length() && pinToShow != lnurlATMPin)
+    if (pinToShow.length() == securityPin.length() && pinToShow != securityPin)
     {
       error("  WRONG PIN");
       delay(1500);
@@ -341,7 +349,7 @@ void accessPoint()
       dataIn = "";
       isATMMoneyPin(true);
     }
-    else if (pinToShow == lnurlATMPin)
+    else if (pinToShow == securityPin)
     {
       error("   SETTINGS", "HOLD 1 FOR USB", "");
       // start portal (any key pressed on startup)
@@ -424,7 +432,7 @@ void onchainMain()
         {
           while (unConfirmed)
           {
-            qrData = "https://" + lnurlATMMS + "/address/" + qrData;
+            qrData = "https://" + mempool + "/address/" + qrData;
             qrShowCodeOnchain(false, " *MENU");
 
             while (unConfirmed)
@@ -454,7 +462,7 @@ void lnMain()
     return;
   }
 
-  if (lncurrency == "" || lncurrency == "default")
+  if (lnCurrency == "" || lnCurrency == "default")
   {
     currencyLoop();
   }
@@ -652,7 +660,7 @@ void lnurlATMMain()
       isATMMoneyPin(true);
     }
 
-    if (pinToShow.length() == lnurlATMPin.length() && pinToShow != lnurlATMPin)
+    if (pinToShow.length() == securityPin.length() && pinToShow != securityPin)
     {
       error("  WRONG PIN");
       delay(1500);
@@ -661,7 +669,7 @@ void lnurlATMMain()
       dataIn = "";
       isATMMoneyPin(true);
     }
-    else if (pinToShow == lnurlATMPin)
+    else if (pinToShow == securityPin)
     {
       isATMMoneyNumber(true);
       inputs = "";
@@ -784,7 +792,7 @@ void isLNMoneyNumber(bool cleared)
   tft.print("  - ENTER AMOUNT -");
   tft.setTextSize(3);
   tft.setCursor(0, 50);
-  tft.println(String(lncurrency) + ": ");
+  tft.println(String(lnCurrency) + ": ");
   tft.println("SAT: ");
   tft.setCursor(0, 120);
   tft.setTextSize(2);
@@ -1218,7 +1226,7 @@ void currencyLoop()
       if (currencyItems[i] == currencyItems[currencyItemNo])
       {
         tft.setTextColor(TFT_GREEN, TFT_BLACK);
-        lncurrency = currencyItems[i];
+        lnCurrency = currencyItems[i];
       }
       else
       {
@@ -1419,7 +1427,7 @@ bool getSats()
   }
   const char *lnbitsServerChar = lnbitsServer.c_str();
   const char *invoiceChar = invoice.c_str();
-  const char *lncurrencyChar = lncurrency.c_str();
+  const char *lncurrencyChar = lnCurrency.c_str();
 
   Serial.println("connecting to LNbits server " + lnbitsServer);
   if (!client.connect(lnbitsServerChar, 443))
