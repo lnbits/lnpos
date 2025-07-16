@@ -95,8 +95,8 @@ export const elements = [
   },
   {
     name: "config_securitypin",
-    value: "",
-    label: "LNURLATM pin String",
+    value: "878787",
+    label: "Security pin for settings and ATM mode",
     type: "text",
   },
   {
