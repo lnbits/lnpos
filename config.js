@@ -26,7 +26,7 @@ export const elements = [
   {
     name: "config_offlinepos",
     value: "",
-    label: "LNURL string from the LNPoS extension",
+    label: "String from the LNPoS extension",
     type: "text",
   },
   {
@@ -36,7 +36,7 @@ export const elements = [
   {
     name: "config_offlineatm",
     value: "",
-    label: "LNURL string from the FOSSA extension",
+    label: "String from the FOSSA extension",
     type: "text",
   },
   {
