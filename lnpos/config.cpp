@@ -1,4 +1,8 @@
 #include "config.h"
+#include "defines.h" // Ensure KeyValue is visible
+#include <FS.h>
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
 
 void configOverSerialPort()
 {

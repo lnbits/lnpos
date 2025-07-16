@@ -51,6 +51,18 @@ extern String pinToShow;
 extern String amountToShow;
 extern String key_val;
 extern String selection;
+extern String offlinePoS;
+extern String offlineATM;
+extern String masterKey;
+extern String lnbitsServer;
+extern String invoice;
+extern String lnCurrency;
+extern String mempool;
+extern String securityPin;
+extern String fiatDecimalPlaces;
+extern String ssid;
+extern String password;
+extern bool hardcoded;
 
 extern const char menuItems[5][13];
 extern const char currencyItems[3][5];
@@ -77,11 +89,11 @@ extern double amountToShowNumber;
 
 enum InvoiceType
 {
-    LNPOS,
-    offlinePoS,
-    ONCHAIN,
-    offlineATM,
-    PORTAL
+    LNPOS_TYPE,         // was LNPOS
+    OFFLINE_POS_TYPE,   // was offlinePoS
+    ONCHAIN_TYPE,       // was ONCHAIN
+    OFFLINE_ATM_TYPE,   // was offlineATM
+    PORTAL_TYPE         // was PORTAL
 };
 
 extern SHA256 h;
@@ -93,8 +105,8 @@ extern char keys[4][3];
 extern byte rowPins[4];
 extern byte colPins[3];
 
-struct KeyValue
-{
+// KeyValue struct for key-value parsing
+struct KeyValue {
     String key;
     String value;
 };
@@ -102,5 +114,24 @@ struct KeyValue
 extern Keypad keypad;
 extern int checker;
 extern char maxdig[20];
+
+#ifndef TFT_BLACK
+#define TFT_BLACK   0x0000
+#endif
+#ifndef TFT_WHITE
+#define TFT_WHITE   0xFFFF
+#endif
+#ifndef TFT_RED
+#define TFT_RED     0xF800
+#endif
+#ifndef TFT_GREEN
+#define TFT_GREEN   0x07E0
+#endif
+#ifndef TFT_ORANGE
+#define TFT_ORANGE  0xFD20
+#endif
+#ifndef TFT_PURPLE
+#define TFT_PURPLE  0x780F
+#endif
 
 #endif // DEFINES_H

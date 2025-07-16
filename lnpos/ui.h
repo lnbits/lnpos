@@ -13,8 +13,8 @@ void inputScreenOnChain();
 void qrShowCodeln();
 void qrShowCodeOnchain(bool anAddress, String message);
 void qrShowCodeLNURL(String message);
-void error(String message);
 void error(String message, String additional, String additional2);
+void error(String message);
 void processing(String message);
 void paymentSuccess();
 void showPin();
@@ -22,8 +22,6 @@ void lnurlInputScreen();
 void logo();
 void currencyLoop();
 void menuLoop();
-
-// Animation
 void printSleepAnimationFrame(String text, int wait);
 void sleepAnimation();
 void wakeAnimation();

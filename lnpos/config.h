@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "defines.h" // Ensure KeyValue is visible
 #include <Arduino.h>
 
 // Config and file management

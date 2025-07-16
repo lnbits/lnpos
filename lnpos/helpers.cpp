@@ -1,6 +1,9 @@
 #include "helpers.h"
 #include "ui.h"
 #include "defines.h"
+#include <FS.h>
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
 
 bool isInteger(const char *str)
 {
@@ -196,7 +199,7 @@ void serialLaunch()
 }
 
 long int lastBatteryCheck = 0;
-void updateBatteryStatus(bool force = false)
+void updateBatteryStatus(bool force)
 {
     // throttle
     if (!force && lastBatteryCheck != 0 && millis() - lastBatteryCheck < 5000)
@@ -727,16 +730,16 @@ void adjustQrBrightness(bool shouldMakeBrighter, InvoiceType invoiceType)
 
     switch (invoiceType)
     {
-    case LNPOS:
+    case LNPOS_TYPE:
         qrShowCodeln();
         break;
-    case offlinePoS:
+    case OFFLINE_POS_TYPE:
         qrShowCodeLNURL(" *MENU #SHOW PIN");
         break;
-    case ONCHAIN:
+    case ONCHAIN_TYPE:
         qrShowCodeOnchain(true, " *MENU #CHECK");
         break;
-    case offlineATM:
+    case OFFLINE_ATM_TYPE:
         qrShowCodeLNURL(" *MENU");
         break;
     default:
@@ -776,13 +779,13 @@ void handleBrightnessAdjust(String keyVal, InvoiceType invoiceType)
     // Handle screen brighten on QR screen
     if (keyVal == "1")
     {
-        Serial.println("Adjust bnrightness " + invoiceType);
+        Serial.println("Adjust bnrightness " + String((int)invoiceType));
         adjustQrBrightness(true, invoiceType);
     }
     // Handle screen dim on QR screen
     else if (keyVal == "4")
     {
-        Serial.println("Adjust bnrightness " + invoiceType);
+        Serial.println("Adjust bnrightness " + String((int)invoiceType));
         adjustQrBrightness(false, invoiceType);
     }
 }

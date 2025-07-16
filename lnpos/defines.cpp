@@ -1,6 +1,6 @@
 #include "defines.h"
 
-// Global variable definitions for lnpos project
+// All global variable definitions are now in this file only
 
 String inputs;
 String thePin;
@@ -28,6 +28,17 @@ String pinToShow;
 String amountToShow;
 String key_val;
 String selection;
+String offlinePoS;
+String offlineATM;
+String masterKey;
+String lnbitsServer;
+String invoice;
+String lnCurrency;
+String mempool;
+String securityPin;
+String fiatDecimalPlaces;
+String ssid;
+String password;
 
 const char menuItems[5][13] = {"", "", "", "", ""}; // Fill with your actual menu items
 const char currencyItems[3][5] = {"", "", ""}; // Fill with your actual currency items
@@ -50,6 +61,7 @@ bool unConfirmed = false;
 bool selected = false;
 bool lnurlCheckPoS = false;
 bool lnurlCheckATM = false;
+bool hardcoded = false;
 double amountToShowNumber = 0.0;
 
 SHA256 h;

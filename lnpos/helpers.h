@@ -1,12 +1,13 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#include "defines.h" // Ensure InvoiceType and global variables are visible
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
 // General
 bool isInteger(const char *str);
-void formatNumber(float number, int fiatDecimalPlaces, char *output);
+void formatNumber(double number, int fiatDecimalPlaces, char *output);
 String getJsonValue(JsonDocument &doc, const char *name);
 String getValue(String data, char separator, int index);
 void to_upper(char *arr);
@@ -34,12 +35,12 @@ void loadConfig();
 // Validation
 bool checkOnlineParams();
 bool checkOfflineParams();
-
-// LNBits/Lightning
-bool getSats();
-bool getInvoice();
-bool checkInvoice();
 bool makeLNURL();
+void qrShowCodeLNURL(String message);
+void showPin();
+void isLNURLMoneyNumber(bool cleared);
+void isATMMoneyPin(bool cleared);
+void isATMMoneyNumber(bool cleared);
 
 // Encryption
 void encrypt(unsigned char *key, unsigned char *iv, int length, const char *plainText, unsigned char *outputBuffer);
@@ -48,5 +49,6 @@ void deriveKeyAndIV(const char *secret, unsigned char *salt, unsigned char *outp
 // Sleep Logic
 void maybeSleepDevice();
 void callback();
+void error(String message);
 
 #endif

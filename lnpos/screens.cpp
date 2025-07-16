@@ -1,4 +1,7 @@
 #include "screens.h"
+#include <FS.h>
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
 
 void onchainMain()
 {
@@ -250,7 +253,7 @@ void offlinePoSMain()
                 {
                     unConfirmed = false;
                 }
-                handleBrightnessAdjust(key_val, offlinePoS);
+                handleBrightnessAdjust(key_val, OFFLINE_POS_TYPE);
             }
         }
         else
@@ -317,7 +320,7 @@ void offlineATMMain()
                     {
                         key_val = "";
                         getKeypad(false, true, false, false);
-                        handleBrightnessAdjust(key_val, offlineATM);
+                        handleBrightnessAdjust(key_val, OFFLINE_ATM_TYPE);
 
                         if (key_val == "*")
                         {
