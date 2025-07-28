@@ -3,7 +3,7 @@ PROJECT_NAME=lnpos
 REPO=https://github.com/lnbits/lnpos/releases/download
 INSTALLER_PATH=./hardware-installer/public/firmware
 
-git clone https://github.com/lnbits/hardware-installer
+git clone --branch headings --single-branch https://github.com/lnbits/hardware-installer.git
 
 cp INSTALLER.md ./hardware-installer/public/INSTALLER.md
 cp versions.json ./hardware-installer/src/versions.json

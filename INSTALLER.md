@@ -4,17 +4,16 @@ LNPoS
 
 ## Free and open-source bitcoin point-of-sale
 
-
 LNPoS includes:
 
-- LNPoS (for online LN payments, original <a href="https://github.com/arcbtc/LNPoS">project</a>)
-- LNURLPoS (for offline LN payments, original <a href="https://github.com/arcbtc/LNURLPoS">project</a> )
-- OnChain (for onchain payments)
-- LNURLATM (for making offline LN withdraw links).
+- Online PoS (for online LN payments, just connects to LNbits wallet over wifi)
+- Offline PoS (for offline LN payments, original <a href="https://github.com/lnbits/lnpos">project</a>)
+- Onchain (for onchain payments, uses an bip39 xpub and also creates a mempool.space link for checking)
+- Offline ATM (for making offline LN withdraw links, original <a href="https://github.com/lnbits/fossa">project</a>)
   <br></br>
 
-Original <a href="https://twitter.com/arcbtc/status/1484942260013838336">demo</a>
+Video tutorial <a href="https://www.youtube.com/watch?v=IhwCEDwGg2E">tutorial</a>
 
-Video tutorial <a href="https://twitter.com/arcbtc/status/1585605023337168896">https://twitter.com/arcbtc/status/1585605023337168896</a>
+Born <a href="https://twitter.com/arcbtc/status/1484942260013838336">here</a>
 
 Join our telegram group <a href="https://t.me/makerbits">MakerBits</a>
