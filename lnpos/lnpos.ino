@@ -85,7 +85,7 @@ String amountToShow = "0";
 String key_val;
 String selection;
 
-const char menuItems[5][13] = {"LNPoS", "Offline PoS", "OnChain", "ATM", "Settings"};
+const char menuItems[5][13] = {"Online PoS", "Offline PoS", "OnChain", "ATM", "Settings"};
 const char currencyItems[3][5] = {"sat", "USD", "EUR"};
 char decimalplacesOutput[20];
 int menuItemCheck[5] = {0, 0, 0, 0, 1};
@@ -265,7 +265,7 @@ void loop()
       menuLoop();
     }
 
-    if (selection == "LNPoS")
+    if (selection == "Online PoS")
     {
       lnMain();
     }
@@ -1484,7 +1484,7 @@ bool getInvoice()
     return false;
   }
 
-  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"LNPoS-" + String(random(1, 1000)) + "\"}";
+  const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"Online PoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
