@@ -351,7 +351,7 @@ void accessPoint()
     }
     else if (pinToShow == securityPin)
     {
-      error("   SETTINGS", "HOLD 1 FOR USB", "");
+      error("   SETTINGS", "HOLD 1 FOR USB \nHOLD 2 TO RESET", "");
       // start portal (any key pressed on startup)
       int count = 0;
       while (count < 10)
@@ -369,6 +369,10 @@ void accessPoint()
           {
             return;
           }
+        }
+        if (key == '2')
+        {
+          ESP.restart();
         }
       }
     }
@@ -1436,26 +1440,33 @@ bool getSats()
     return false;
   }
 
-  const String toPost = "{\"amount\" : 1, \"from\" :\"" + String(lncurrencyChar) + "\"}";
+  const String toPost = "{\"amount\" : 1, \"from_\" :\"" + String(lncurrencyChar) + "\", \"to\" : \"sat\"}";
   const String url = "/api/v1/conversion";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + String(lnbitsServerChar) + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + String(invoiceChar) + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
 
+  // Skip response headers
   while (client.connected())
   {
-    const String line = client.readStringUntil('\n');
+    String line = client.readStringUntil('\n');
     if (line == "\r")
-    {
       break;
-    }
   }
 
-  const String line = client.readString();
-  StaticJsonDocument<150> doc;
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
+  // Read entire body
+  String payload;
+  while (client.available())
+  {
+    char c = client.read();
+    payload += c;
+  }
+
+  StaticJsonDocument<3000> doc;
+  DeserializationError jsonError = deserializeJson(doc, payload);
+
+  if (jsonError)
   {
     Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
+    Serial.println(jsonError.f_str());
     return false;
   }
 
@@ -1487,29 +1498,39 @@ bool getInvoice()
   const String toPost = "{\"out\": false,\"amount\" : " + String(noSats.toInt()) + ", \"memo\" :\"Online PoS-" + String(random(1, 1000)) + "\"}";
   const String url = "/api/v1/payments";
   client.print(String("POST ") + url + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "X-Api-Key: " + invoiceChar + " \r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n" + "Content-Length: " + toPost.length() + "\r\n" + "\r\n" + toPost + "\n");
-
+  // Skip response headers
   while (client.connected())
   {
-    const String line = client.readStringUntil('\n');
-
+    String line = client.readStringUntil('\n');
     if (line == "\r")
-    {
       break;
-    }
   }
-  const String line = client.readString();
 
-  StaticJsonDocument<1000> doc;
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
+  // IMPORTANT, to skip "443\r\n
+  client.readStringUntil('\n');
+
+  // Read JSON payload
+  String payload;
+  while (client.connected())
+  {
+    String line = client.readStringUntil('\n');
+    if (line == "\r" || line.length() == 0)
+      break;
+    payload += line + "\n";
+  }
+
+  Serial.println(payload);
+  StaticJsonDocument<3000> doc;
+  DeserializationError jsonError = deserializeJson(doc, payload);
+  if (jsonError)
   {
     Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
+    Serial.println(jsonError.f_str());
     return false;
   }
 
   const char *payment_hash = doc["checking_id"];
-  const char *payment_request = doc["payment_request"];
+  const char *payment_request = doc["bolt11"];
   qrData = payment_request;
   dataId = payment_hash;
 
@@ -1533,24 +1554,28 @@ bool checkInvoice()
 
   const String url = "/api/v1/payments/";
   client.print(String("GET ") + url + dataId + " HTTP/1.1\r\n" + "Host: " + lnbitsServerChar + "\r\n" + "User-Agent: ESP32\r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n\r\n");
+  // Skip response headers
   while (client.connected())
   {
-    const String line = client.readStringUntil('\n');
+    String line = client.readStringUntil('\n');
     if (line == "\r")
-    {
       break;
-    }
   }
 
-  const String line = client.readString();
-  Serial.println(line);
-  StaticJsonDocument<2000> doc;
+  // Read entire body
+  String payload;
+  while (client.available())
+  {
+    char c = client.read();
+    payload += c;
+  }
 
-  DeserializationError error = deserializeJson(doc, line);
-  if (error)
+  StaticJsonDocument<3000> doc;
+  DeserializationError jsonError = deserializeJson(doc, payload);
+  if (jsonError)
   {
     Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
+    Serial.println(jsonError.f_str());
     return false;
   }
   if (doc["paid"])
@@ -1612,10 +1637,13 @@ bool makeLNURL()
   String secret;
   char hexbuffer[3];
 
-  if (selection == "Offline PoS") {
+  if (selection == "Offline PoS")
+  {
     preparedURL = baseURLPoS;
     secret = secretPoS;
-  } else {
+  }
+  else
+  {
     // ATM
     preparedURL = baseURLATM;
     secret = secretATM;
@@ -1624,7 +1652,8 @@ bool makeLNURL()
   int salt_length = 8;
   unsigned char salt[salt_length];
 
-  for (int i = 0; i < salt_length; i++) {
+  for (int i = 0; i < salt_length; i++)
+  {
     salt[i] = random(0, 256);
   }
 
@@ -1646,7 +1675,8 @@ bool makeLNURL()
   size_t payload_len = payload.length();
   int padding = 16 - (payload_len % 16);
   payload_len += padding;
-  for (int i = 0; i < padding; i++) {
+  for (int i = 0; i < padding; i++)
+  {
     payload += String((char)padding);
   }
 
@@ -1660,7 +1690,7 @@ bool makeLNURL()
   memcpy(salted + 16, encrypted, payload_len);
 
   preparedURL += "?p=";
-  preparedURL += toBase64(salted, payload_len+16, BASE64_URLSAFE);
+  preparedURL += toBase64(salted, payload_len + 16, BASE64_URLSAFE);
   Serial.println(preparedURL);
 
   char Buf[200];
@@ -1896,17 +1926,19 @@ void printSleepAnimationFrame(String text, int wait)
 }
 
 //////////ENCRYPTION///////////////
-void encrypt(unsigned char* key, unsigned char* iv, int length, const char* plainText, unsigned char* outputBuffer){
+void encrypt(unsigned char *key, unsigned char *iv, int length, const char *plainText, unsigned char *outputBuffer)
+{
   mbedtls_aes_context aes;
   mbedtls_aes_init(&aes);
   mbedtls_aes_setkey_enc(&aes, key, 256); // AES-256 requires a 32-byte key
-  mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, length, iv, (const unsigned char*)plainText, outputBuffer);
+  mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, length, iv, (const unsigned char *)plainText, outputBuffer);
   mbedtls_aes_free(&aes);
 }
 
-void deriveKeyAndIV(const char* secret, unsigned char* salt, unsigned char* outputBuffer) {
+void deriveKeyAndIV(const char *secret, unsigned char *salt, unsigned char *outputBuffer)
+{
   mbedtls_md5_context md5_ctx;
-  unsigned char data[24]; // 16 bytes key + 8 bytes salt
+  unsigned char data[24];      // 16 bytes key + 8 bytes salt
   unsigned char md5Output[16]; // 16 bytes for MD5 output
 
   memcpy(data, secret, 16);
@@ -1922,7 +1954,8 @@ void deriveKeyAndIV(const char* secret, unsigned char* salt, unsigned char* outp
 
   unsigned char data_md5[16 + 16 + 8]; // 16 bytes md5 output + 16 bytes key + 8 bytes salt
 
-  for (int i = 16; i <= 48; i+=16) {
+  for (int i = 16; i <= 48; i += 16)
+  {
     memcpy(data_md5, md5Output, 16);
     memcpy(data_md5 + 16, data, 24);
     mbedtls_md5_init(&md5_ctx);
@@ -1934,4 +1967,3 @@ void deriveKeyAndIV(const char* secret, unsigned char* salt, unsigned char* outp
 
   mbedtls_md5_free(&md5_ctx);
 }
-
