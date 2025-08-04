@@ -45,7 +45,7 @@ export const elements = [
   },
   {
     name: "config_masterkey",
-    value: "xpub6CGXUdDautexBBybgGaFnhVwSzjVozfiGefFgHfaTjjKk1DVkNKzYM1akU8fJHafGBhaVY7tP5zkMorFi2vKPFmBjv8s6KwcPYkFG4C6khn",
+    value: "",
     label: "Onchain Extended Public Key",
     type: "text",
   },
@@ -61,31 +61,31 @@ export const elements = [
   },
   {
     name: "config_lncurrency",
-    value: "GBP",
-    label: "PoS Currency. ie: EUR",
+    value: "USD",
+    label: "PoS Currency. ie: GBP, EUR",
     type: "text",
   },
   {
     name: "config_server",
-    value: "https://v1.lnbits.com",
+    value: "https://demo.lnbits.com",
     label: "LNbits Server",
     type: "text",
   },
   {
     name: "config_invoice",
-    value: "517400f477ec44d7a9187b3bce88c721",
+    value: "",
     label: "Wallet Invoice Key",
     type: "text",
   },
   {
     name: "config_wifi_ssid",
-    value: "ithurtswhenip",
+    value: "",
     label: "WiFi SSID",
     type: "text",
   },
   {
     name: "config_wifi_password",
-    value: "qwertyu",
+    value: "",
     label: "WiFi Password",
     type: "text",
   },
@@ -95,8 +95,8 @@ export const elements = [
   },
   {
     name: "config_securitypin",
-    value: "878787",
-    label: "Security pin for settings and ATM mode",
+    value: "000000",
+    label: "Security pin for settings and ATM mode, 4-6 characters",
     type: "text",
   },
   {
