@@ -105,4 +105,14 @@ export const elements = [
     label: "FIAT Decimal Places ie 2 for USD, 0 for YEN",
     type: "text",
   },
+  {
+    type: "heading",
+    label: "Device settings",
+  },
+  {
+    name: "config_qr_screen_brightness",
+    value: 121,
+    label: "QR Screen Brightness (0-255)",
+    type: "text",
+  },
 ];
