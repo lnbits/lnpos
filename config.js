@@ -1,11 +1,11 @@
 export const addressesAndFiles = [
   {
     address: "0x1000",
-    fileName: "lnpos.ino.bootloader.bin",
+    fileName: "bootloader.bin",
   },
   {
     address: "0x8000",
-    fileName: "lnpos.ino.partitions.bin",
+    fileName: "partitions.bin",
   },
   {
     address: "0xE000",
@@ -13,7 +13,7 @@ export const addressesAndFiles = [
   },
   {
     address: "0x10000",
-    fileName: "lnpos.ino.bin",
+    fileName: "main.ino.bin",
   },
 ];
 
@@ -103,6 +103,16 @@ export const elements = [
     name: "config_fiatdecimalplaces",
     value: 2,
     label: "FIAT Decimal Places ie 2 for USD, 0 for YEN",
+    type: "text",
+  },
+  {
+    type: "heading",
+    label: "Device settings",
+  },
+  {
+    name: "config_qr_screen_brightness",
+    value: 121,
+    label: "QR Screen Brightness (0-255)",
     type: "text",
   },
 ];
